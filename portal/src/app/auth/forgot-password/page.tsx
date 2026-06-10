@@ -2,39 +2,37 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { forgotPasswordSchema, type ForgotPasswordValues } from '@/features/auth/schemas'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Mail, ArrowLeft, CheckCircle, Loader2 } from 'lucide-react'
 import { api } from '@/lib/api'
+import { handleApiError } from '@/lib/error-handler'
 import { toast } from 'sonner'
 
 export default function ForgotPasswordPage() {
-  const [email, setEmail] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    
-    if (!email) {
-      toast.error('Please enter your email address')
-      return
-    }
+  const form = useForm<ForgotPasswordValues>({
+    resolver: zodResolver(forgotPasswordSchema),
+    defaultValues: { email: '' },
+  })
 
-    setIsLoading(true)
-    
+  const submittedEmail = form.getValues('email')
+
+  const onSubmit = form.handleSubmit(async (values) => {
     try {
-      const response = await api.forgotPassword(email)
+      await api.forgotPassword(values.email)
       setIsSubmitted(true)
       toast.success('Password reset instructions sent!')
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to send reset email')
-    } finally {
-      setIsLoading(false)
+    } catch (error) {
+      handleApiError(error, 'Failed to send reset email')
     }
-  }
+  })
 
   if (isSubmitted) {
     return (
@@ -56,7 +54,7 @@ export default function ForgotPasswordPage() {
             
             <CardContent className="p-0 text-center space-y-6">
               <p className="text-muted-foreground leading-relaxed">
-                We've sent password reset instructions to <span className="font-semibold text-foreground">{email}</span>
+                We've sent password reset instructions to <span className="font-semibold text-foreground">{submittedEmail}</span>
               </p>
               
               <div className="p-4 bg-accent/10 rounded-2xl border border-accent/20">
@@ -120,40 +118,46 @@ export default function ForgotPasswordPage() {
           </CardHeader>
           
           <CardContent className="p-0">
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="email" className="text-sm font-semibold text-foreground">
-                  Email Address
-                </Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="Enter your email address"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="rounded-2xl border-2 h-12 px-4 font-medium"
-                  required
+            <Form {...form}>
+              <form onSubmit={onSubmit} className="space-y-6">
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-semibold text-foreground">Email Address</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="email"
+                          placeholder="Enter your email address"
+                          className="rounded-2xl border-2 h-12 px-4 font-medium"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
-              </div>
-              
-              <Button 
-                type="submit" 
-                disabled={isLoading}
-                className="w-full rounded-2xl font-bold h-12 bg-gradient-to-r from-destructive to-cta hover:scale-105 transition-all duration-200"
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                    Sending...
-                  </>
-                ) : (
-                  <>
-                    <Mail className="mr-2 h-5 w-5" />
-                    Send Reset Link
-                  </>
-                )}
-              </Button>
-            </form>
+
+                <Button
+                  type="submit"
+                  disabled={form.formState.isSubmitting}
+                  className="w-full rounded-2xl font-bold h-12 bg-gradient-to-r from-destructive to-cta hover:scale-105 transition-all duration-200"
+                >
+                  {form.formState.isSubmitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                      Sending...
+                    </>
+                  ) : (
+                    <>
+                      <Mail className="mr-2 h-5 w-5" />
+                      Send Reset Link
+                    </>
+                  )}
+                </Button>
+              </form>
+            </Form>
             
             <div className="mt-8 text-center">
               <Link 

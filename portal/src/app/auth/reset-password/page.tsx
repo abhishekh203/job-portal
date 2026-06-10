@@ -3,30 +3,36 @@
 import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { resetPasswordSchema, type ResetPasswordValues } from '@/features/auth/schemas'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Lock, Eye, EyeOff, CheckCircle, Loader2, ArrowRight } from 'lucide-react'
 import { api } from '@/lib/api'
 import { useAuth } from '@/hooks/use-auth'
+import { handleApiError } from '@/lib/error-handler'
 import { toast } from 'sonner'
 
 // Force dynamic rendering for this page since it uses searchParams
 export const dynamic = 'force-dynamic'
 
 function ResetPasswordContent() {
-  const [password, setPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
   const [token, setToken] = useState<string | null>(null)
 
   const router = useRouter()
   const searchParams = useSearchParams()
   const { login } = useAuth()
+
+  const form = useForm<ResetPasswordValues>({
+    resolver: zodResolver(resetPasswordSchema),
+    defaultValues: { password: '', confirmPassword: '' },
+  })
 
   useEffect(() => {
     const tokenParam = searchParams.get('token')
@@ -38,28 +44,14 @@ function ResetPasswordContent() {
     setToken(tokenParam)
   }, [searchParams, router])
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-
+  const onSubmit = form.handleSubmit(async (values) => {
     if (!token) {
       toast.error('Invalid reset token')
       return
     }
 
-    if (password.length < 8) {
-      toast.error('Password must be at least 8 characters long')
-      return
-    }
-
-    if (password !== confirmPassword) {
-      toast.error('Passwords do not match')
-      return
-    }
-
-    setIsLoading(true)
-
     try {
-      const response = await api.resetPassword(token, password)
+      const response = await api.resetPassword(token, values.password)
 
       // Auto-login the user
       if (response.token) {
@@ -73,13 +65,10 @@ function ResetPasswordContent() {
       setTimeout(() => {
         router.push('/dashboard')
       }, 3000)
-
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to reset password')
-    } finally {
-      setIsLoading(false)
+    } catch (error) {
+      handleApiError(error, 'Failed to reset password')
     }
-  }
+  })
 
   if (isSuccess) {
     return (
@@ -154,80 +143,88 @@ function ResetPasswordContent() {
           </CardHeader>
 
           <CardContent className="p-0">
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="password" className="text-sm font-semibold text-foreground">
-                  New Password
-                </Label>
-                <div className="relative">
-                  <Input
-                    id="password"
-                    type={showPassword ? 'text' : 'password'}
-                    placeholder="Enter your new password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="rounded-2xl border-2 h-12 px-4 pr-12 font-medium"
-                    required
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 p-0"
-                    onClick={() => setShowPassword(!showPassword)}
-                  >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </Button>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Must be at least 8 characters long
-                </p>
-              </div>
+            <Form {...form}>
+              <form onSubmit={onSubmit} className="space-y-6">
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-semibold text-foreground">New Password</FormLabel>
+                      <div className="relative">
+                        <FormControl>
+                          <Input
+                            type={showPassword ? 'text' : 'password'}
+                            placeholder="Enter your new password"
+                            className="rounded-2xl border-2 h-12 px-4 pr-12 font-medium"
+                            {...field}
+                          />
+                        </FormControl>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 p-0"
+                          onClick={() => setShowPassword(!showPassword)}
+                        >
+                          {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        </Button>
+                      </div>
+                      <p className="text-xs text-muted-foreground">Must be at least 8 characters long</p>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              <div className="space-y-2">
-                <Label htmlFor="confirmPassword" className="text-sm font-semibold text-foreground">
-                  Confirm Password
-                </Label>
-                <div className="relative">
-                  <Input
-                    id="confirmPassword"
-                    type={showConfirmPassword ? 'text' : 'password'}
-                    placeholder="Confirm your new password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="rounded-2xl border-2 h-12 px-4 pr-12 font-medium"
-                    required
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 p-0"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  >
-                    {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </Button>
-                </div>
-              </div>
+                <FormField
+                  control={form.control}
+                  name="confirmPassword"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-semibold text-foreground">Confirm Password</FormLabel>
+                      <div className="relative">
+                        <FormControl>
+                          <Input
+                            type={showConfirmPassword ? 'text' : 'password'}
+                            placeholder="Confirm your new password"
+                            className="rounded-2xl border-2 h-12 px-4 pr-12 font-medium"
+                            {...field}
+                          />
+                        </FormControl>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 p-0"
+                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        >
+                          {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        </Button>
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              <Button
-                type="submit"
-                disabled={isLoading}
-                className="w-full rounded-2xl font-bold h-12 bg-gradient-to-r from-destructive to-cta hover:scale-105 transition-all duration-200"
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                    Resetting...
-                  </>
-                ) : (
-                  <>
-                    <Lock className="mr-2 h-5 w-5" />
-                    Reset Password
-                  </>
-                )}
-              </Button>
-            </form>
+                <Button
+                  type="submit"
+                  disabled={form.formState.isSubmitting}
+                  className="w-full rounded-2xl font-bold h-12 bg-gradient-to-r from-destructive to-cta hover:scale-105 transition-all duration-200"
+                >
+                  {form.formState.isSubmitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                      Resetting...
+                    </>
+                  ) : (
+                    <>
+                      <Lock className="mr-2 h-5 w-5" />
+                      Reset Password
+                    </>
+                  )}
+                </Button>
+              </form>
+            </Form>
           </CardContent>
         </Card>
 
