@@ -1,9 +1,9 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { useQuery } from '@tanstack/react-query'
 import { useAuth } from '@/hooks/use-auth'
-import { api } from '@/lib/api'
+import { employerDashboardQuery } from '@/features/employer/queries'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -26,34 +26,6 @@ import {
   UserPlus,
 } from 'lucide-react'
 
-interface ApplicationBreakdown {
-  status: string
-  _count: { id: number }
-}
-
-interface RecentApplicant {
-  id: string
-  applicantName: string
-  applicantAvatar: string | null
-  jobTitle: string
-  jobSlug: string
-  status: string
-  appliedAt: string
-}
-
-interface DashboardStats {
-  totalJobs: number
-  activeJobs: number
-  pendingJobs: number
-  rejectedJobs: number
-  totalApplications: number
-  jobsExpiringSoon: number
-  totalViews: number
-  applicationRate: number
-  applicationBreakdown: ApplicationBreakdown[]
-  recentApplicants: RecentApplicant[]
-}
-
 const statusConfig: Record<string, { label: string; class: string }> = {
   PENDING: { label: 'Pending', class: 'bg-warning/10 text-warning border-warning/20' },
   REVIEWED: { label: 'Reviewed', class: 'bg-primary/10 text-primary border-primary/20' },
@@ -74,27 +46,20 @@ function ApplicationStatusBadge({ status }: { status: string }) {
 
 export default function EmployerDashboardPage() {
   const { user } = useAuth()
-  const [stats, setStats] = useState<DashboardStats | null>(null)
-  const [loading, setLoading] = useState(true)
+  const { data: stats, isLoading, isError } = useQuery(employerDashboardQuery())
 
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const data = await api.getEmployerDashboard()
-        setStats(data)
-      } catch (error) {
-        console.error('Failed to fetch dashboard stats:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-    fetchStats()
-  }, [])
-
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    )
+  }
+
+  if (isError) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <p className="text-sm text-muted-foreground">Failed to load dashboard. Please try again.</p>
       </div>
     )
   }
