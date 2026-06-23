@@ -1,6 +1,10 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/* Tailwind Typography — powers the `prose` classes used to render markdown /
+   rich-text job descriptions and blog posts. */
+@plugin "@tailwindcss/typography";
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -39,10 +43,37 @@
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
 
+<<<<<<< Updated upstream
   /* Fonts */
   --font-sans: var(--font-inter);
   --font-heading: var(--font-urbanist);
+=======
+  /* Fonts — Inter carries all body + UI text (legible at small sizes across
+     listings, tables, forms); Montserrat is reserved for headings/display;
+     serif only for pull-quotes; mono only for actual code. */
+  --font-sans: var(--font-inter);
+  --font-heading: var(--font-montserrat);
+  --font-serif: var(--font-source-serif);
+>>>>>>> Stashed changes
   --font-mono: var(--font-jetbrains-mono);
+
+  /* Parchment surface system (ElevenLabs-style) — neutral warm whites */
+  --color-parchment-white: #fdfcfc;
+  --color-warm-sand: #f5f3f1;
+  --color-ash-border: #e5e5e5;
+
+  /* Brand palette — exposed as utilities (bg-cream-paper, text-forest-teal…) */
+  --color-cream-paper: #fff5ee;
+  --color-ink-black: #0f161e;
+  --color-graphite: #333942;
+  --color-forest-teal: #004038;
+  --color-deep-moss: #00544c;
+  --color-lime-spark: #d5ff4d;
+  --color-cyan-pulse: #00f5dc;
+  --color-mint-glow: #7edcaf;
+  --color-apricot-wash: #fde8ce;
+  --color-peach-tile: #ffdcbf;
+  --color-sky-tile: #bee9f4;
 
   /* Sidebar colors (if needed) */
   --color-sidebar: var(--sidebar);
@@ -61,9 +92,22 @@
   --radius-xl: calc(var(--radius) + 4px);
 }
 
-:root {
-  --radius: 0.5rem;
+<<<<<<< Updated upstream
+=======
+/* ──────────────────────────────────────────────────────────────
+   Workable palette — warm portrait gallery on cream paper. Mapped
+   onto the standard shadcn token names so every component adapts
+   automatically. Light theme.
 
+   Depth comes from layering surface colour (cream → white → pastel),
+   never from drop shadows. Forest Teal is the brand primary; pastels
+   (apricot / sky / peach) differentiate secondary surfaces.
+   ────────────────────────────────────────────────────────────── */
+>>>>>>> Stashed changes
+:root {
+  --radius: 0.75rem;               /* 12px — friendly but tighter for a pro hiring tool */
+
+<<<<<<< Updated upstream
   /* 🔵 Primary (Action) - Royal Blue #2563EB */
   --primary: oklch(0.55 0.22 264);
   --primary-foreground: oklch(0.98 0.001 264);
@@ -174,6 +218,102 @@
   /* 🧡 CTA Variant - Brighter Vibrant Orange for dark mode */
   --cta: oklch(0.75 0.20 45);
   --cta-foreground: oklch(0.10 0.01 45);
+=======
+  /* Surfaces — parchment canvas, white elevated cards */
+  --background: #fdfcfc;           /* Parchment White — page canvas */
+  --foreground: #0f161e;           /* Ink Black — primary text  */
+  --card: #ffffff;                 /* Pure White — elevated surface */
+  --card-foreground: #0f161e;
+  --popover: #ffffff;
+  --popover-foreground: #0f161e;
+
+  /* Primary — Forest Teal brand */
+  --primary: #004038;
+  --primary-foreground: #ffffff;
+
+  /* Secondary — Apricot Wash pastel */
+  --secondary: #fde8ce;
+  --secondary-foreground: #0f161e;
+
+  /* Muted — warm sand surface + graphite text */
+  --muted: #f5f3f1;                /* Warm Sand — section/muted surface */
+  --muted-foreground: #333942;     /* Graphite */
+
+  /* Accent — Sky Tile pastel (hover surfaces, highlights) */
+  --accent: #bee9f4;
+  --accent-foreground: #0f161e;
+
+  /* Error — warm brick red */
+  --destructive: #b3402e;
+
+  /* Borders and inputs — ash hairline rules */
+  --border: #e5e5e5;
+  --input: #e5e5e5;
+  --ring: #004038;
+
+  /* Chart palette — brand teal/moss + decorative accents */
+  --chart-1: #004038;   /* forest teal */
+  --chart-2: #00544c;   /* deep moss   */
+  --chart-3: #00b4a0;   /* cyan-teal   */
+  --chart-4: #e0a04a;   /* warm amber  */
+  --chart-5: #b3402e;   /* brick       */
+
+  /* Success — deep moss green */
+  --success: #00544c;
+  --success-foreground: #ffffff;
+
+  /* Warning — warm amber */
+  --warning: #c2872f;
+  --warning-foreground: #0f161e;
+
+  /* CTA — Ink Black filled action (the system's one dark fill) */
+  --cta: #0f161e;
+  --cta-foreground: #ffffff;
+}
+
+/* ── Dark theme — deep forest low-light ───────────────────────── */
+.dark {
+  --background: #0c1714;            /* deep teal-tinted ink */
+  --foreground: #f3efe7;
+  --card: #11201c;
+  --card-foreground: #f3efe7;
+  --popover: #11201c;
+  --popover-foreground: #f3efe7;
+
+  /* Primary — brightened mint-teal so it reads on dark */
+  --primary: #5fcab0;
+  --primary-foreground: #0c1714;
+
+  --secondary: #1a2a25;
+  --secondary-foreground: #e6efe9;
+  --muted: #16241f;
+  --muted-foreground: #9bb0a6;
+
+  --accent: #1f3a39;
+  --accent-foreground: #d7f1ee;
+
+  --destructive: #e06b54;
+
+  --border: #213029;
+  --input: #213029;
+  --ring: #5fcab0;
+
+  --chart-1: #5fcab0;
+  --chart-2: #00c2ab;
+  --chart-3: #7edcaf;
+  --chart-4: #e0a04a;
+  --chart-5: #e06b54;
+
+  --success: #7edcaf;
+  --success-foreground: #0c1714;
+
+  --warning: #e0a04a;
+  --warning-foreground: #0c1714;
+
+  /* CTA — keep a bright filled action on dark */
+  --cta: #f3efe7;
+  --cta-foreground: #0c1714;
+>>>>>>> Stashed changes
 }
 
 
@@ -185,6 +325,25 @@
     @apply bg-background text-foreground font-medium;
   }
 
+<<<<<<< Updated upstream
+=======
+  /* Night mode — subtle green ambient glow behind the page.
+     Two soft radial washes (top + corner) using the brand mint/teal greens,
+     fixed so they read as atmosphere rather than scrolling content. */
+  .dark body {
+    background-image:
+      radial-gradient(75% 55% at 50% -12%, color-mix(in srgb, #5fcab0 14%, transparent) 0%, transparent 62%),
+      radial-gradient(45% 45% at 100% 0%, color-mix(in srgb, #7edcaf 9%, transparent) 0%, transparent 70%);
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+  }
+
+  /* Warm text selection */
+  ::selection {
+    background: color-mix(in srgb, var(--accent) 22%, transparent);
+  }
+
+>>>>>>> Stashed changes
   /* Modern scrollbar */
   ::-webkit-scrollbar {
     width: 6px;
@@ -201,16 +360,62 @@
   }
 
   /* Typography styles */
+  h1, h2, h3 {
+    @apply font-heading;
+  }
+
   h1 {
-    @apply text-3xl font-heading;
+    @apply text-3xl;
   }
 
   p {
     @apply text-base font-sans;
   }
 
-  code, label {
+  /* Form labels read in the UI sans, not mono — legible and professional. */
+  label {
+    @apply text-sm font-medium font-sans;
+  }
+
+  /* Mono reserved for actual code only. */
+  code {
     @apply text-xs font-mono;
+  }
+
+  /* ── Markdown / rich-text (`prose`) themed to brand tokens ──────────
+     Job descriptions and blog posts render through these. Mapping the
+     Tailwind Typography variables to our design tokens means content
+     follows the theme (incl. dark mode) without per-component overrides. */
+  .prose {
+    --tw-prose-body: var(--foreground);
+    --tw-prose-headings: var(--foreground);
+    --tw-prose-lead: var(--muted-foreground);
+    --tw-prose-links: var(--primary);
+    --tw-prose-bold: var(--foreground);
+    --tw-prose-counters: var(--muted-foreground);
+    --tw-prose-bullets: var(--primary);
+    --tw-prose-hr: var(--border);
+    --tw-prose-quotes: var(--foreground);
+    --tw-prose-quote-borders: var(--primary);
+    --tw-prose-captions: var(--muted-foreground);
+    --tw-prose-code: var(--foreground);
+    --tw-prose-pre-code: var(--card-foreground);
+    --tw-prose-pre-bg: var(--muted);
+    --tw-prose-th-borders: var(--border);
+    --tw-prose-td-borders: var(--border);
+  }
+
+  /* Headings inside prose use the display face; links carry a brand underline. */
+  .prose :is(h1, h2, h3, h4) {
+    font-family: var(--font-heading);
+    @apply font-semibold;
+  }
+  .prose a {
+    @apply font-medium underline decoration-primary/40 underline-offset-2 transition-colors hover:decoration-primary;
+  }
+  .prose :where(blockquote) {
+    font-family: var(--font-serif);
+    @apply not-italic;
   }
 }
 
@@ -245,21 +450,56 @@
     box-shadow: 0 4px 20px var(--cta) / 0.15;
   }
 
-  /* Professional gradient backgrounds */
+  /* Brand gradient backgrounds — teal/moss depth for branded surfaces */
   .gradient-primary {
-    background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+    background: linear-gradient(135deg, var(--color-forest-teal) 0%, var(--color-deep-moss) 100%);
   }
 
   .gradient-accent {
-    background: linear-gradient(135deg, var(--accent) 0%, var(--primary) 100%);
+    background: linear-gradient(135deg, var(--color-deep-moss) 0%, var(--color-forest-teal) 100%);
   }
 
   .gradient-success {
-    background: linear-gradient(135deg, var(--success) 0%, var(--accent) 100%);
+    background: linear-gradient(135deg, var(--color-deep-moss) 0%, var(--color-forest-teal) 100%);
   }
 
   .gradient-cta {
-    background: linear-gradient(135deg, var(--cta) 0%, var(--warning) 100%);
+    background: linear-gradient(135deg, var(--color-ink-black) 0%, var(--color-graphite) 100%);
+  }
+
+  /* ===== Workable signature atmosphere ===== */
+
+  /* Tri-stop mint-glow wash (cyan → lime → violet). Use ONLY as a
+     full-bleed atmospheric backdrop behind product/portrait panels —
+     never as a button or card fill. */
+  .gradient-mint {
+    background: linear-gradient(90deg, #00f5dc 0%, #d5ff4d 48.5%, #b773ff 100%);
+  }
+
+  /* Soft warm secondary backdrop (teal → peach) */
+  .gradient-warm {
+    background: linear-gradient(120deg, var(--color-forest-teal) 0%, var(--color-peach-tile) 100%);
+  }
+
+  /* Cheerful gradient underline for display headlines */
+  .heading-underline {
+    position: relative;
+    display: inline-block;
+  }
+  .heading-underline::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -0.18em;
+    height: 0.18em;
+    border-radius: 9999px;
+    background: linear-gradient(90deg, #00f5dc 0%, #d5ff4d 48.5%, #b773ff 100%);
+  }
+
+  /* Pill category badge — pastel fill, no border, generous radius */
+  .category-badge {
+    @apply inline-flex items-center rounded-full bg-secondary px-4 py-1.5 text-sm font-bold text-foreground;
   }
 
   /* Floating animation */

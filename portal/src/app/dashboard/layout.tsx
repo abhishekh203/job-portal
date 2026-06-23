@@ -80,7 +80,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
             <div className="h-8 w-8 rounded-lg gradient-primary flex items-center justify-center">
               <Briefcase className="h-4 w-4 text-primary-foreground" />
             </div>
-            <span className="text-lg font-bold text-foreground">JobPortal</span>
+            <span className="text-lg font-bold text-foreground">NayaJagir</span>
           </Link>
           <Button variant="ghost" size="icon" className="lg:hidden h-8 w-8" onClick={() => setSidebarOpen(false)}>
             <X className="h-4 w-4" />

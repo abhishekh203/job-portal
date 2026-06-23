@@ -101,7 +101,7 @@ export default function RegisterPage() {
             <div className="h-10 w-10 rounded-lg bg-primary flex items-center justify-center">
               <Briefcase className="h-6 w-6 text-primary-foreground" />
             </div>
-            <span className="text-2xl font-bold text-foreground">JobPortal</span>
+            <span className="text-2xl font-bold text-foreground">NayaJagir</span>
           </Link>
         </div>
 

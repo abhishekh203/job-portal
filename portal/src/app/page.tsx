@@ -1,12 +1,15 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { useQuery } from '@tanstack/react-query'
 import { api, Job } from '@/lib/api'
+import { PopularSearches } from '@/components/home/popular-searches'
+import { MobileJobSearch } from '@/components/home/mobile-job-search'
 import {
   Search,
   MapPin,
@@ -17,7 +20,6 @@ import {
   Star,
   ArrowRight,
   CheckCircle,
-  Sparkles,
   Zap,
   Rocket,
   Target,
@@ -97,19 +99,20 @@ export default function HomePage() {
   return (
     <div className="min-h-screen">
       {/* ===== HERO ===== */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-background via-primary/[0.03] to-accent/[0.03]">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--primary)_0%,_transparent_60%),radial-gradient(ellipse_at_bottom_left,_var(--accent)_0%,_transparent_60%)] opacity-[0.04]" />
-        <div className="absolute top-20 -left-20 w-80 h-80 bg-primary/5 rounded-full blur-3xl" />
-        <div className="absolute -bottom-20 -right-20 w-96 h-96 bg-accent/5 rounded-full blur-3xl" />
+      <section className="relative min-h-[680px] overflow-hidden bg-cream-paper dark:bg-background">
+        <Image
+          src="/images/job-portal-hero-v1.png"
+          alt="Two young professionals ready to find their next career opportunity"
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover object-[68%_center] transition-[filter] dark:brightness-[0.42] dark:saturate-75"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-cream-paper via-cream-paper/95 to-cream-paper/20 dark:from-background dark:via-background/95 dark:to-background/35 lg:via-cream-paper/75 lg:to-transparent lg:dark:via-background/85 lg:dark:to-background/10" />
 
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
-          <div className="py-28 lg:py-36 max-w-5xl mx-auto text-center">
-            <div className="flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary font-semibold rounded-full text-sm mb-8 w-fit mx-auto border border-primary/20">
-              <Sparkles className="h-4 w-4" />
-              Trusted by 10,000+ professionals
-            </div>
-
-            <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold text-foreground mb-6 leading-[1.1] tracking-tight">
+          <div className="flex min-h-[680px] max-w-3xl flex-col justify-center py-20 lg:max-w-2xl lg:py-28">
+            <h1 className="mb-6 text-5xl font-bold leading-[1.05] tracking-tight text-foreground md:text-6xl lg:text-7xl">
               Find Your{' '}
               <span className="gradient-primary bg-clip-text text-transparent">
                 Dream Job
@@ -118,19 +121,19 @@ export default function HomePage() {
               <span className="text-foreground/80">Without the Drama</span>
             </h1>
 
-            <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed">
+            <p className="mb-10 max-w-xl text-lg leading-relaxed text-muted-foreground md:text-xl">
               Connect with verified companies, apply with your profile, and land the career you deserve.
             </p>
 
             {/* Search Bar */}
-            <div className="max-w-2xl mx-auto mb-8">
+            <div className="mb-8 w-full max-w-xl">
               <div className="relative">
                 <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <Input
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search for jobs, companies, or keywords..."
-                  className="pl-14 pr-36 h-16 text-base rounded-2xl border-2 border-border bg-background/80 backdrop-blur-sm shadow-xl shadow-primary/5 focus-visible:ring-primary/30"
+                  className="pl-14 pr-36 h-16 text-base rounded-2xl border-2 border-border bg-background/80 backdrop-blur-sm shadow-xl shadow-primary/5 focus-visible:ring-primary/30 dark:bg-card/85 dark:border-primary/25 dark:text-foreground dark:placeholder:text-muted-foreground"
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' && searchQuery.trim()) {
                       window.location.href = `/jobs?search=${encodeURIComponent(searchQuery.trim())}`
@@ -140,7 +143,7 @@ export default function HomePage() {
                 <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-2">
                   <Button
                     asChild
-                    className="h-12 px-6 rounded-xl gradient-primary shadow-md hover:shadow-lg transition-all duration-200"
+                    className="h-12 px-6 rounded-xl gradient-primary text-white shadow-md hover:shadow-lg transition-all duration-200"
                   >
                     <Link href={searchQuery.trim() ? `/jobs?search=${encodeURIComponent(searchQuery.trim())}` : '/jobs'}>
                       Search <ArrowRight className="ml-2 h-4 w-4" />
@@ -151,7 +154,7 @@ export default function HomePage() {
             </div>
 
             {/* Trust indicators */}
-            <div className="flex flex-wrap justify-center items-center gap-8 text-sm text-muted-foreground">
+            <div className="flex max-w-xl flex-wrap items-center gap-x-6 gap-y-3 text-sm text-muted-foreground">
               <div className="flex items-center gap-2">
                 <CheckCircle className="h-4 w-4 text-primary" />
                 <span>Verified Companies</span>
@@ -196,6 +199,12 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* ===== POPULAR SEARCHES ===== */}
+      <PopularSearches />
+
+      {/* ===== MOBILE JOB SEARCH ===== */}
+      <MobileJobSearch />
 
       {/* ===== TRUSTED BY ===== */}
       <section className="py-16 lg:py-20 border-y border-border/40 bg-muted/20">
@@ -392,7 +401,7 @@ export default function HomePage() {
               What Our Users Say
             </h2>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              Real stories from real people who found success on JobPortal.
+              Real stories from real people who found success on NayaJagir.
             </p>
           </div>
 

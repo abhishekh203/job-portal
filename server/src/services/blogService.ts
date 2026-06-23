@@ -208,5 +208,5 @@ const buildBlogStructuredData = (title: string, excerpt?: string, description?: 
   headline: title,
   description: excerpt || description || title,
   datePublished: new Date().toISOString(),
-  author: { '@type': 'Organization', name: process.env.FROM_NAME || 'Job Portal' },
+  author: { '@type': 'Organization', name: process.env.FROM_NAME || 'NayaJagir' },
 });

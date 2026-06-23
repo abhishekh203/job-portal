@@ -76,9 +76,9 @@ export default function ContactPage() {
     {
       icon: Mail,
       title: 'Email Us',
-      details: 'hello@jobportal.com',
+      details: 'hello@nayajagir.com',
       description: 'Send us an email anytime',
-      action: 'mailto:hello@jobportal.com',
+      action: 'mailto:hello@nayajagir.com',
     },
     {
       icon: Phone,
@@ -102,7 +102,7 @@ export default function ContactPage() {
       answer: 'Currently, job posting is handled through our admin panel. Please contact us to discuss your hiring needs.',
     },
     {
-      question: 'Is JobPortal free for job seekers?',
+      question: 'Is NayaJagir free for job seekers?',
       answer: 'Yes! Creating an account, browsing jobs, and applying for positions is completely free for job seekers.',
     },
     {

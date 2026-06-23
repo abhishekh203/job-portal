@@ -240,7 +240,7 @@ export default function ProfilePage() {
                 <PartyPopper className="h-6 w-6 text-primary" />
               </div>
               <div className="flex-1">
-                <h3 className="font-semibold text-foreground mb-2">Welcome to JobPortal!</h3>
+                <h3 className="font-semibold text-foreground mb-2">Welcome to NayaJagir!</h3>
                 <p className="text-sm text-muted-foreground mb-4">
                   Complete your profile to unlock the full potential of our platform.
                 </p>

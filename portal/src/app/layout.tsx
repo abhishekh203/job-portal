@@ -1,5 +1,9 @@
 import type { Metadata } from "next";
+<<<<<<< Updated upstream
 import { Inter, Urbanist, JetBrains_Mono } from "next/font/google";
+=======
+import { Inter, Montserrat, Source_Serif_4, JetBrains_Mono } from "next/font/google";
+>>>>>>> Stashed changes
 import "./globals.css";
 import { QueryProvider } from "@/lib/query-client";
 import { ThemeProvider } from "next-themes";
@@ -8,12 +12,28 @@ import { SiteLayout } from "@/components/layout/site-layout";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { AuthProvider } from "@/hooks/use-auth";
 
+// Inter carries all body + UI text (nav, paragraphs, buttons, labels, tables).
+// Its tall x-height and open apertures stay legible at 14–16px across the
+// data-dense listing/dashboard/form surfaces a job portal is made of.
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
 });
 
+<<<<<<< Updated upstream
 const urbanist = Urbanist({
+=======
+// Montserrat is reserved for headings/display only — geometric impact at large
+// sizes, where its even strokes read as confident rather than monotonous.
+const montserrat = Montserrat({
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
+  variable: "--font-montserrat",
+});
+
+// Source Serif is reserved for rare editorial pull-quote moments only.
+const sourceSerif = Source_Serif_4({
+>>>>>>> Stashed changes
   subsets: ["latin"],
   variable: "--font-urbanist",
 });
@@ -24,19 +44,19 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "JobPortal - Find Your Dream Job",
+  title: "NayaJagir - Find Your Dream Job",
   description: "Connecting talented professionals with amazing opportunities. Find your dream job or discover your next great hire.",
   keywords: ["jobs", "careers", "employment", "hiring", "recruitment"],
-  authors: [{ name: "JobPortal Team" }],
+  authors: [{ name: "NayaJagir Team" }],
   openGraph: {
-    title: "JobPortal - Find Your Dream Job",
+    title: "NayaJagir - Find Your Dream Job",
     description: "Connecting talented professionals with amazing opportunities.",
     type: "website",
     locale: "en_US",
   },
   twitter: {
     card: "summary_large_image",
-    title: "JobPortal - Find Your Dream Job",
+    title: "NayaJagir - Find Your Dream Job",
     description: "Connecting talented professionals with amazing opportunities.",
   },
 };
@@ -48,7 +68,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+<<<<<<< Updated upstream
       <body className={`${inter.variable} ${urbanist.variable} ${jetbrainsMono.variable}`}>
+=======
+      <body className={`${inter.variable} ${montserrat.variable} ${sourceSerif.variable} ${jetbrainsMono.variable}`}>
+>>>>>>> Stashed changes
         <ThemeProvider
           attribute="class"
           defaultTheme="light"

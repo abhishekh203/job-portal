@@ -42,7 +42,7 @@ function VerifyEmailContent() {
         // Auto-login the user
         if (response.token) {
           login(response.token, response.user)
-          toast.success('Email verified successfully! Welcome to JobPortal!')
+          toast.success('Email verified successfully! Welcome to NayaJagir!')
         }
 
         setStatus('success')

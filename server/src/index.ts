@@ -107,7 +107,7 @@ const swaggerOptions = {
   definition: {
     openapi: '3.0.0',
     info: {
-      title: 'Job Portal API',
+      title: 'NayaJagir API',
       version: '1.0.0',
       description: 'A comprehensive job portal API with user and admin functionality',
     },

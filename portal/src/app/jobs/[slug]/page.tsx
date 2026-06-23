@@ -16,7 +16,7 @@ export async function generateMetadata({ params }: JobPageProps): Promise<Metada
     console.log(job)
 
     return {
-      title: `${job.title} at ${job.companyName} | JobPortal`,
+      title: `${job.title} at ${job.companyName} | NayaJagir`,
       description: job.description.replace(/<[^>]*>/g, '').substring(0, 160),
       keywords: [job.title, job.companyName, job.category, job.location, 'job', 'career'],
       openGraph: {
@@ -38,7 +38,7 @@ export async function generateMetadata({ params }: JobPageProps): Promise<Metada
     }
   } catch {
     return {
-      title: 'Job Not Found | JobPortal',
+      title: 'Job Not Found | NayaJagir',
       description: 'The job you are looking for could not be found.',
     }
   }

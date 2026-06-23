@@ -72,7 +72,7 @@ export default function Layout({ children }: LayoutProps) {
         <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200">
           <div className="flex items-center">
             <div className="flex-shrink-0">
-              <h1 className="text-xl font-bold text-gray-900">JobPortal Admin</h1>
+              <h1 className="text-xl font-bold text-gray-900">NayaJagir Admin</h1>
             </div>
           </div>
           <button
