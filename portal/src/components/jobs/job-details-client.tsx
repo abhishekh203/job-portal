@@ -51,10 +51,10 @@ import {
   getJobTypeLabel,
   getWorkTypeLabel,
   getExperienceLabel,
-  formatDate,
 } from "@/lib/api"
 import { toast } from "sonner"
 import { sanitizeHtml } from "@/lib/sanitize"
+import { formatDate } from "@/lib/utils"
 
 interface JobDetailsClientProps {
   job: Job

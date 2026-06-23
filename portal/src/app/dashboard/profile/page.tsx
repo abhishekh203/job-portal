@@ -2,81 +2,108 @@
 
 import { useState, useEffect, useRef, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
 import { useRequireAuth } from '@/hooks/use-auth'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
-
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import {
-  Mail,
-  Phone,
-  MapPin,
   Upload,
   FileText,
   Loader2,
   CheckCircle,
-  AlertCircle,
   PartyPopper,
-  TrendingUp,
-  Sparkles,
-  MessageSquare,
-  PenTool,
-  Lightbulb,
-  Rocket,
-  Briefcase,
-  GraduationCap,
   Globe,
   Linkedin,
   Github,
   Eye,
-  User
+  User,
 } from 'lucide-react'
-import { api, UserProfile, getExperienceLabel } from '@/lib/api'
+import { api, type UserProfile, getExperienceLabel } from '@/lib/api'
+import { handleApiError } from '@/lib/error-handler'
 import { toast } from 'sonner'
 
-export default function ProfilePage() {
-  function ProfilePageContent() {
+const urlRegex = /^https?:\/\/.+/
+const phoneRegex = /^\+?[\d\s()-]+$/
+
+const profileSchema = z
+  .object({
+    firstName: z.string().trim().min(1, 'First name is required'),
+    lastName: z.string().trim().min(1, 'Last name is required'),
+    phone: z.string().optional(),
+    bio: z.string().max(500, 'Bio must be under 500 chars').optional(),
+    skills: z.array(z.string()),
+    experience: z.string().optional(),
+    education: z.string().optional(),
+    location: z.string().max(100, 'Location must be under 100 chars').optional(),
+    website: z.string().optional(),
+    linkedin: z.string().optional(),
+    github: z.string().optional(),
+  })
+  .superRefine((v, ctx) => {
+    if (v.phone && v.phone.trim() && !phoneRegex.test(v.phone)) {
+      ctx.addIssue({ code: 'custom', path: ['phone'], message: 'Please enter a valid phone number' })
+    }
+    if (v.website && v.website.trim() && !urlRegex.test(v.website)) {
+      ctx.addIssue({ code: 'custom', path: ['website'], message: 'Please enter a valid URL (starting with http:// or https://)' })
+    }
+    if (v.linkedin && v.linkedin.trim() && !urlRegex.test(v.linkedin)) {
+      ctx.addIssue({ code: 'custom', path: ['linkedin'], message: 'Please enter a valid LinkedIn URL' })
+    }
+    if (v.github && v.github.trim() && !urlRegex.test(v.github)) {
+      ctx.addIssue({ code: 'custom', path: ['github'], message: 'Please enter a valid GitHub URL' })
+    }
+  })
+type ProfileFormValues = z.infer<typeof profileSchema>
+
+const profileFormDefaults: ProfileFormValues = {
+  firstName: '',
+  lastName: '',
+  phone: '',
+  bio: '',
+  skills: [],
+  experience: '',
+  education: '',
+  location: '',
+  website: '',
+  linkedin: '',
+  github: '',
+}
+
+function ProfilePageContent() {
   const { user, loading, updateUserProfile } = useRequireAuth()
   const router = useRouter()
   const searchParams = useSearchParams()
   const isWelcome = searchParams.get('welcome') === 'true'
   const queryClient = useQueryClient()
 
+  const [skillInput, setSkillInput] = useState('')
+  const profilePicRef = useRef<HTMLInputElement>(null)
+  const resumeRef = useRef<HTMLInputElement>(null)
+
+  const form = useForm<ProfileFormValues>({
+    resolver: zodResolver(profileSchema),
+    defaultValues: profileFormDefaults,
+  })
+
+  // Employers manage their company profile elsewhere.
   useEffect(() => {
     if (!loading && user?.role === 'EMPLOYER') {
       router.replace('/dashboard/employer/company')
     }
   }, [user, loading, router])
 
-
-
-  const [formData, setFormData] = useState<Partial<UserProfile>>({
-    firstName: '',
-    lastName: '',
-    phone: '',
-    bio: '',
-    skills: [],
-    experience: '',
-    education: '',
-    location: '',
-    website: '',
-    linkedin: '',
-    github: '',
-  })
-  const [skillInput, setSkillInput] = useState('')
-  const [errors, setErrors] = useState<Record<string, string>>({})
-
-  const profilePicRef = useRef<HTMLInputElement>(null)
-  const resumeRef = useRef<HTMLInputElement>(null)
-
+  // Pre-fill once the authenticated user is available.
   useEffect(() => {
     if (user) {
-      setFormData({
+      form.reset({
         firstName: user.firstName || '',
         lastName: user.lastName || '',
         phone: user.phone || '',
@@ -90,111 +117,60 @@ export default function ProfilePage() {
         github: user.github || '',
       })
     }
-  }, [user])
+  }, [user, form])
 
   const updateProfileMutation = useMutation({
     mutationFn: (data: Partial<UserProfile>) => api.updateProfile(data),
     onSuccess: (response) => {
       toast.success(response.message || 'Profile updated successfully!')
-      // Update the user in Zustand store instead of making API call
       updateUserProfile(response.user)
       queryClient.invalidateQueries({ queryKey: ['profile'] })
     },
-    onError: (error: any) => {
-      toast.error(error?.message || 'Failed to update profile')
-    }
+    onError: (error) => handleApiError(error, 'Failed to update profile'),
+  })
+
+  // Strip empty optional links before sending to the backend.
+  const toUpdatePayload = (values: ProfileFormValues): Partial<UserProfile> => ({
+    ...values,
+    website: values.website?.trim() || undefined,
+    linkedin: values.linkedin?.trim() || undefined,
+    github: values.github?.trim() || undefined,
+    phone: values.phone?.trim() || undefined,
   })
 
   const uploadFileMutation = useMutation({
     mutationFn: ({ file, type }: { file: File; type: 'resume' | 'profile-picture' }) =>
       api.uploadFile(file, type),
     onSuccess: (data, variables) => {
-      // Preserve current form data and only update the specific file field
-      const updateData = {
-        ...formData,
-        website: formData.website?.trim() || undefined,
-        linkedin: formData.linkedin?.trim() || undefined,
-        github: formData.github?.trim() || undefined,
-        phone: formData.phone?.trim() || undefined,
-      }
-
+      // Persist the new file URL alongside the current (unsaved) form values.
+      const payload = toUpdatePayload(form.getValues())
       if (variables.type === 'resume') {
-        updateProfileMutation.mutate({ ...updateData, resume: data.url })
+        updateProfileMutation.mutate({ ...payload, resume: data.url })
       } else {
-        updateProfileMutation.mutate({ ...updateData, profilePicture: data.url })
+        updateProfileMutation.mutate({ ...payload, profilePicture: data.url })
       }
     },
-    onError: (error: any) => {
-      toast.error(error?.message || 'Failed to upload file')
-    }
+    onError: (error) => handleApiError(error, 'Failed to upload file'),
   })
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target
-    setFormData(prev => ({ ...prev, [name]: value }))
-  }
+  const values = form.watch()
+  const skills = values.skills || []
 
   const handleAddSkill = () => {
     const skill = skillInput.trim()
-    if (skill && !(formData.skills || []).includes(skill)) {
-      setFormData(prev => ({
-        ...prev,
-        skills: [...(prev.skills || []), skill]
-      }))
+    if (skill && !skills.includes(skill)) {
+      form.setValue('skills', [...skills, skill])
       setSkillInput('')
     }
   }
 
   const handleRemoveSkill = (skillToRemove: string) => {
-    setFormData(prev => ({
-      ...prev,
-      skills: prev.skills?.filter(s => s !== skillToRemove) || []
-    }))
+    form.setValue('skills', skills.filter((s) => s !== skillToRemove))
   }
 
-  const validateForm = () => {
-    const newErrors: Record<string, string> = {}
-
-    if (!formData.firstName?.trim()) newErrors.firstName = 'First name is required'
-    if (!formData.lastName?.trim()) newErrors.lastName = 'Last name is required'
-    if (formData.bio && formData.bio.length > 500) newErrors.bio = 'Bio must be under 500 chars'
-    if (formData.location && formData.location.length > 100) newErrors.location = 'Location must be under 100 chars'
-
-    // Phone validation (optional)
-    if (formData.phone && formData.phone.trim() && !/^\+?[\d\s\-\(\)]+$/.test(formData.phone)) {
-      newErrors.phone = 'Please enter a valid phone number'
-    }
-
-    // URL validation for social links (optional)
-    const urlRegex = /^https?:\/\/.+/
-    if (formData.website && formData.website.trim() && !urlRegex.test(formData.website)) {
-      newErrors.website = 'Please enter a valid URL (starting with http:// or https://)'
-    }
-    if (formData.linkedin && formData.linkedin.trim() && !urlRegex.test(formData.linkedin)) {
-      newErrors.linkedin = 'Please enter a valid LinkedIn URL'
-    }
-    if (formData.github && formData.github.trim() && !urlRegex.test(formData.github)) {
-      newErrors.github = 'Please enter a valid GitHub URL'
-    }
-
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (validateForm()) {
-      // Filter out empty social links before sending to backend
-      const cleanedData = {
-        ...formData,
-        website: formData.website?.trim() || undefined,
-        linkedin: formData.linkedin?.trim() || undefined,
-        github: formData.github?.trim() || undefined,
-        phone: formData.phone?.trim() || undefined,
-      }
-      updateProfileMutation.mutate(cleanedData)
-    }
-  }
+  const onSubmit = form.handleSubmit((vals) => {
+    updateProfileMutation.mutate(toUpdatePayload(vals))
+  })
 
   const triggerFileUpload = (type: 'resume' | 'profile-picture') => {
     if (type === 'resume') resumeRef.current?.click()
@@ -214,13 +190,13 @@ export default function ProfilePage() {
     )
   }
 
-  const completionItems = [
-    ['firstName', 'First Name', !!formData.firstName],
-    ['lastName', 'Last Name', !!formData.lastName],
-    ['bio', 'Bio', !!formData.bio],
-    ['skills', 'Skills', (formData.skills || []).length > 0],
-    ['location', 'Location', !!formData.location],
-    ['resume', 'Resume', !!user.resume]
+  const completionItems: [string, string, boolean][] = [
+    ['firstName', 'First Name', !!values.firstName],
+    ['lastName', 'Last Name', !!values.lastName],
+    ['bio', 'Bio', !!values.bio],
+    ['skills', 'Skills', skills.length > 0],
+    ['location', 'Location', !!values.location],
+    ['resume', 'Resume', !!user.resume],
   ]
   const completedCount = completionItems.filter(([, , done]) => done).length
   const completionPct = Math.round((completedCount / completionItems.length) * 100)
@@ -290,7 +266,7 @@ export default function ProfilePage() {
               <input ref={profilePicRef} type="file" accept="image/*" className="hidden" onChange={e => handleFileChange(e, 'profile-picture')} />
 
               <h3 className="font-semibold text-foreground">
-                {formData.firstName ? `${formData.firstName} ${formData.lastName || ''}` : 'Your Name'}
+                {values.firstName ? `${values.firstName} ${values.lastName || ''}` : 'Your Name'}
               </h3>
               <p className="text-sm text-muted-foreground">{user.email}</p>
 
@@ -363,7 +339,7 @@ export default function ProfilePage() {
             </CardHeader>
             <CardContent className="space-y-3">
               {completionItems.map(([key, label, done]) => (
-                <div key={String(key)} className="flex items-center gap-3">
+                <div key={key} className="flex items-center gap-3">
                   <div className={`h-5 w-5 rounded-full flex items-center justify-center shrink-0 ${done ? 'bg-success' : 'bg-muted'}`}>
                     {done ? <CheckCircle className="h-3 w-3 text-success-foreground" /> : <div className="h-2 w-2 rounded-full bg-muted-foreground/40" />}
                   </div>
@@ -374,24 +350,24 @@ export default function ProfilePage() {
           </Card>
 
           {/* Social Links Display */}
-          {(formData.website || formData.linkedin || formData.github) && (
+          {(values.website || values.linkedin || values.github) && (
             <Card className="border border-border/60">
               <CardHeader>
                 <CardTitle className="text-sm font-semibold">Social Links</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
-                {formData.website && (
-                  <a href={formData.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted transition-colors text-sm text-muted-foreground">
+                {values.website && (
+                  <a href={values.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted transition-colors text-sm text-muted-foreground">
                     <Globe className="h-4 w-4" /> Website
                   </a>
                 )}
-                {formData.linkedin && (
-                  <a href={formData.linkedin} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted transition-colors text-sm text-muted-foreground">
+                {values.linkedin && (
+                  <a href={values.linkedin} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted transition-colors text-sm text-muted-foreground">
                     <Linkedin className="h-4 w-4" /> LinkedIn
                   </a>
                 )}
-                {formData.github && (
-                  <a href={formData.github} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted transition-colors text-sm text-muted-foreground">
+                {values.github && (
+                  <a href={values.github} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted transition-colors text-sm text-muted-foreground">
                     <Github className="h-4 w-4" /> GitHub
                   </a>
                 )}
@@ -410,109 +386,200 @@ export default function ProfilePage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-8">
-                <div className="space-y-5">
-                  <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Basic Information</h3>
-                  <div className="grid sm:grid-cols-2 gap-5">
+              <Form {...form}>
+                <form onSubmit={onSubmit} className="space-y-8">
+                  <div className="space-y-5">
+                    <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Basic Information</h3>
+                    <div className="grid sm:grid-cols-2 gap-5">
+                      <FormField
+                        control={form.control}
+                        name="firstName"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>First Name *</FormLabel>
+                            <FormControl>
+                              <Input placeholder="John" className="h-11 rounded-xl" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="lastName"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Last Name *</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Doe" className="h-11 rounded-xl" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                    <FormField
+                      control={form.control}
+                      name="phone"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Phone (Optional)</FormLabel>
+                          <FormControl>
+                            <Input placeholder="+1 (555) 123-4567" className="h-11 rounded-xl" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <div className="space-y-5">
+                    <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">About You</h3>
+                    <FormField
+                      control={form.control}
+                      name="bio"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Bio *</FormLabel>
+                          <FormControl>
+                            <Textarea rows={4} placeholder="Tell us about yourself..." className="rounded-xl resize-none" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="location"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Location *</FormLabel>
+                          <FormControl>
+                            <Input placeholder="City, Country" className="h-11 rounded-xl" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <div className="space-y-5">
+                    <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Skills *</h3>
                     <div>
-                      <Label htmlFor="firstName" className="text-sm font-medium text-foreground mb-1.5 block">First Name *</Label>
-                      <Input id="firstName" name="firstName" value={formData.firstName} onChange={handleInputChange} placeholder="John" className={`h-11 rounded-xl ${errors.firstName ? 'border-destructive' : ''}`} />
-                      {errors.firstName && <p className="text-xs text-destructive mt-1.5">{errors.firstName}</p>}
-                    </div>
-                    <div>
-                      <Label htmlFor="lastName" className="text-sm font-medium text-foreground mb-1.5 block">Last Name *</Label>
-                      <Input id="lastName" name="lastName" value={formData.lastName} onChange={handleInputChange} placeholder="Doe" className={`h-11 rounded-xl ${errors.lastName ? 'border-destructive' : ''}`} />
-                      {errors.lastName && <p className="text-xs text-destructive mt-1.5">{errors.lastName}</p>}
+                      <div className="flex gap-2 mb-3">
+                        <Input
+                          value={skillInput}
+                          onChange={e => setSkillInput(e.target.value)}
+                          onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), handleAddSkill())}
+                          placeholder="Type a skill and press Enter"
+                          className="h-11 rounded-xl"
+                        />
+                        <Button type="button" onClick={handleAddSkill} className="rounded-xl h-11 px-5 gradient-primary">Add</Button>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {skills.map(skill => (
+                          <Badge key={skill} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-muted hover:bg-muted/80 text-foreground font-medium text-sm">
+                            {skill}
+                            <button type="button" onClick={() => handleRemoveSkill(skill)} className="hover:text-destructive transition-colors text-muted-foreground">&times;</button>
+                          </Badge>
+                        ))}
+                      </div>
+                      {skills.length === 0 && (
+                        <p className="text-xs text-muted-foreground mt-2">Add skills like &ldquo;JavaScript&rdquo;, &ldquo;Project Management&rdquo;, etc.</p>
+                      )}
                     </div>
                   </div>
-                  <div>
-                    <Label htmlFor="phone" className="text-sm font-medium text-foreground mb-1.5 block">Phone (Optional)</Label>
-                    <Input id="phone" name="phone" value={formData.phone} onChange={handleInputChange} placeholder="+1 (555) 123-4567" className={`h-11 rounded-xl ${errors.phone ? 'border-destructive' : ''}`} />
-                    {errors.phone && <p className="text-xs text-destructive mt-1.5">{errors.phone}</p>}
-                  </div>
-                </div>
 
-                <div className="space-y-5">
-                  <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">About You</h3>
-                  <div>
-                    <Label htmlFor="bio" className="text-sm font-medium text-foreground mb-1.5 block">Bio *</Label>
-                    <Textarea id="bio" name="bio" value={formData.bio} onChange={handleInputChange} rows={4} placeholder="Tell us about yourself..." className={`rounded-xl resize-none ${errors.bio ? 'border-destructive' : ''}`} />
-                    {errors.bio && <p className="text-xs text-destructive mt-1.5">{errors.bio}</p>}
+                  <div className="space-y-5">
+                    <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Experience & Education</h3>
+                    <FormField
+                      control={form.control}
+                      name="experience"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Work Experience</FormLabel>
+                          <FormControl>
+                            <Textarea rows={4} placeholder="Describe your work experience..." className="rounded-xl resize-none" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="education"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Education</FormLabel>
+                          <FormControl>
+                            <Textarea rows={3} placeholder="Your educational background..." className="rounded-xl resize-none" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                   </div>
-                  <div>
-                    <Label htmlFor="location" className="text-sm font-medium text-foreground mb-1.5 block">Location *</Label>
-                    <Input id="location" name="location" value={formData.location} onChange={handleInputChange} placeholder="City, Country" className={`h-11 rounded-xl ${errors.location ? 'border-destructive' : ''}`} />
-                    {errors.location && <p className="text-xs text-destructive mt-1.5">{errors.location}</p>}
-                  </div>
-                </div>
 
-                <div className="space-y-5">
-                  <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Skills *</h3>
-                  <div>
-                    <div className="flex gap-2 mb-3">
-                      <Input value={skillInput} onChange={e => setSkillInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), handleAddSkill())} placeholder="Type a skill and press Enter" className="h-11 rounded-xl" />
-                      <Button type="button" onClick={handleAddSkill} className="rounded-xl h-11 px-5 gradient-primary">Add</Button>
+                  <div className="space-y-5">
+                    <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Social Links</h3>
+                    <p className="text-xs text-muted-foreground -mt-3">Optional — won&rsquo;t affect profile completion.</p>
+                    <div className="grid sm:grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="website"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Website</FormLabel>
+                            <FormControl>
+                              <Input placeholder="https://" className="h-11 rounded-xl" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="linkedin"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>LinkedIn</FormLabel>
+                            <FormControl>
+                              <Input placeholder="https://linkedin.com/" className="h-11 rounded-xl" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="github"
+                        render={({ field }) => (
+                          <FormItem className="sm:col-span-2">
+                            <FormLabel>GitHub</FormLabel>
+                            <FormControl>
+                              <Input placeholder="https://github.com/" className="h-11 rounded-xl" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
                     </div>
-                    <div className="flex flex-wrap gap-2">
-                      {formData.skills?.map(skill => (
-                        <Badge key={skill} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-muted hover:bg-muted/80 text-foreground font-medium text-sm">
-                          {skill}
-                          <button type="button" onClick={() => handleRemoveSkill(skill)} className="hover:text-destructive transition-colors text-muted-foreground">&times;</button>
-                        </Badge>
-                      ))}
-                    </div>
-                    {(!formData.skills || formData.skills.length === 0) && (
-                      <p className="text-xs text-muted-foreground mt-2">Add skills like &ldquo;JavaScript&rdquo;, &ldquo;Project Management&rdquo;, etc.</p>
-                    )}
                   </div>
-                </div>
 
-                <div className="space-y-5">
-                  <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Experience & Education</h3>
-                  <div>
-                    <Label htmlFor="experience" className="text-sm font-medium text-foreground mb-1.5 block">Work Experience</Label>
-                    <Textarea id="experience" name="experience" value={formData.experience} onChange={handleInputChange} rows={4} placeholder="Describe your work experience..." className="rounded-xl resize-none" />
-                  </div>
-                  <div>
-                    <Label htmlFor="education" className="text-sm font-medium text-foreground mb-1.5 block">Education</Label>
-                    <Textarea id="education" name="education" value={formData.education} onChange={handleInputChange} rows={3} placeholder="Your educational background..." className="rounded-xl resize-none" />
-                  </div>
-                </div>
-
-                <div className="space-y-5">
-                  <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Social Links</h3>
-                  <p className="text-xs text-muted-foreground -mt-3">Optional — won&rsquo;t affect profile completion.</p>
-                  <div className="grid sm:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="website" className="text-sm font-medium text-foreground mb-1.5 block">Website</Label>
-                      <Input id="website" name="website" value={formData.website} onChange={handleInputChange} placeholder="https://" className={`h-11 rounded-xl ${errors.website ? 'border-destructive' : ''}`} />
-                      {errors.website && <p className="text-xs text-destructive mt-1.5">{errors.website}</p>}
-                    </div>
-                    <div>
-                      <Label htmlFor="linkedin" className="text-sm font-medium text-foreground mb-1.5 block">LinkedIn</Label>
-                      <Input id="linkedin" name="linkedin" value={formData.linkedin} onChange={handleInputChange} placeholder="https://linkedin.com/" className={`h-11 rounded-xl ${errors.linkedin ? 'border-destructive' : ''}`} />
-                      {errors.linkedin && <p className="text-xs text-destructive mt-1.5">{errors.linkedin}</p>}
-                    </div>
-                    <div className="sm:col-span-2">
-                      <Label htmlFor="github" className="text-sm font-medium text-foreground mb-1.5 block">GitHub</Label>
-                      <Input id="github" name="github" value={formData.github} onChange={handleInputChange} placeholder="https://github.com/" className={`h-11 rounded-xl ${errors.github ? 'border-destructive' : ''}`} />
-                      {errors.github && <p className="text-xs text-destructive mt-1.5">{errors.github}</p>}
-                    </div>
-                  </div>
-                </div>
-
-                <Button type="submit" className="w-full h-12 rounded-xl gradient-primary shadow-md hover:shadow-lg transition-all" disabled={updateProfileMutation.isPending}>
-                  {updateProfileMutation.isPending ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving...</> : <>Save Changes</>}
-                </Button>
-              </form>
+                  <Button type="submit" className="w-full h-12 rounded-xl gradient-primary shadow-md hover:shadow-lg transition-all" disabled={updateProfileMutation.isPending}>
+                    {updateProfileMutation.isPending ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving...</> : <>Save Changes</>}
+                  </Button>
+                </form>
+              </Form>
             </CardContent>
           </Card>
         </div>
       </div>
     </div>
   )
-  }
+}
 
+export default function ProfilePage() {
   return (
     <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div>}>
       <ProfilePageContent />

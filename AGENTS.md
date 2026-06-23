@@ -1,21 +1,23 @@
 # Job Portal — Codebase Guide
 
 ## Project Overview
-Monorepo with 3 services: a Next.js public frontend (`client/`), a React admin dashboard (`admin/`), and an Express backend API (`server/`).
+Monorepo with 3 services: a Next.js public frontend (`portal/`), a React admin dashboard (`admin/`), and an Express backend API (`server/`).
+
+> **Frontend patterns:** `portal/` has its own engineering guide at [`portal/CLAUDE.md`](portal/CLAUDE.md) — the source of truth for data fetching (TanStack Query), forms (react-hook-form + Zod), the typed API layer, and folder structure. Read it before changing `portal/` code.
 
 ## Tech Stack
 
 | Service | Framework | Language | Key Libraries |
 |---------|-----------|----------|--------------|
 | **server/** | Express.js 5 | TypeScript | Prisma (PostgreSQL), Zod, JWT, Supabase Storage, Nodemailer (Gmail SMTP), Swagger, sanitize-html |
-| **client/** | Next.js 15 (App Router, Turbopack) | TypeScript | Tailwind CSS v4, ShadCN/Radix UI, TanStack Query v5, Zustand v5, react-hook-form + Zod, framer-motion, sonner, dompurify |
+| **portal/** | Next.js 15 (App Router, Turbopack) | TypeScript | Tailwind CSS v4, shadcn/Radix UI, TanStack Query v5, react-hook-form + Zod, sonner, dompurify (Zustand v5 is installed but not currently used) |
 | **admin/** | React 19 (Vite) | TypeScript | Tailwind CSS v4, react-router-dom v7, TanStack Query v5, Zustand v5 (persist), recharts, Axios, @tanstack/react-table, react-hot-toast, dompurify |
 
 ## Architecture
 
 ```
 ┌─────────────┐     ┌──────────────┐     ┌────────────┐     ┌────────────┐
-│  client/    │────▶│              │────▶│  Prisma    │────▶│ PostgreSQL │
+│  portal/    │────▶│              │────▶│  Prisma    │────▶│ PostgreSQL │
 │  (Next.js)  │     │   server/    │     │  (ORM)     │     │            │
 ├─────────────┤     │  (Express)   │     └────────────┘     └────────────┘
 │  admin/     │────▶│              │
@@ -48,7 +50,7 @@ job-portal/
 │   ├── prisma/
 │   │   └── schema.prisma           # DB schema (User, Job, Application, Blog)
 │   └── start.js                     # Production entry (loads dotenv + compiled dist/)
-├── client/                          # Public frontend (port 3000)
+├── portal/                          # Public frontend (port 3000)
 │   └── src/
 │       ├── app/                     # Next.js App Router pages
 │       │   ├── page.tsx             # Home page
@@ -176,7 +178,7 @@ job-portal/
 | `npm run db:studio` | Open Prisma Studio GUI |
 | `npm run db:seed` | Seed database with sample data |
 
-### client/
+### portal/
 | Command | Description |
 |---------|-------------|
 | `npm run dev` | Next.js dev server with Turbopack (port 3000) |

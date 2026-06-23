@@ -3,7 +3,15 @@
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { api } from '@/lib/api'
+import { useQuery } from '@tanstack/react-query'
+import { type ApplicationStatus } from '@/lib/api'
+import {
+  employerJobQuery,
+  employerApplicationsQuery,
+  useToggleEmployerJobFeatured,
+  useUpdateApplicationStatus,
+} from '@/features/employer/queries'
+import { handleApiError } from '@/lib/error-handler'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -33,56 +41,45 @@ const STATUS_OPTIONS = ['PENDING', 'REVIEWED', 'SHORTLISTED', 'ACCEPTED', 'REJEC
 export default function EmployerJobDetailPage() {
   const params = useParams()
   const router = useRouter()
-  const [job, setJob] = useState<any>(null)
-  const [applications, setApplications] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
-  const [updatingId, setUpdatingId] = useState<string | null>(null)
+  const jobId = params.id as string
   const [expandedApp, setExpandedApp] = useState<string | null>(null)
 
-  const fetchData = async () => {
-    try {
-      const [jobRes, appsRes] = await Promise.all([
-        api.getEmployerJob(params.id as string),
-        api.getEmployerApplications(params.id as string, { limit: 100 }),
-      ])
-      setJob(jobRes.job)
-      setApplications(appsRes.data || [])
-    } catch (error) {
+  const jobQuery = useQuery(employerJobQuery(jobId))
+  const appsQuery = useQuery(employerApplicationsQuery(jobId, { limit: 100 }))
+
+  const job = jobQuery.data?.job
+  const applications = appsQuery.data?.data ?? []
+
+  const toggleFeatured = useToggleEmployerJobFeatured()
+  const updateStatus = useUpdateApplicationStatus(jobId)
+
+  // Preserve original UX: bounce back to the list if the job fails to load.
+  useEffect(() => {
+    if (jobQuery.isError) {
       toast.error('Failed to load job details')
       router.push('/dashboard/employer/jobs')
-    } finally {
-      setLoading(false)
     }
+  }, [jobQuery.isError, router])
+
+  const handleStatusChange = (applicationId: string, status: ApplicationStatus) => {
+    updateStatus.mutate(
+      { applicationId, status },
+      {
+        onSuccess: () => toast.success('Application status updated'),
+        onError: (error) => handleApiError(error, 'Failed to update status'),
+      }
+    )
   }
 
-  useEffect(() => {
-    fetchData()
-  }, [params.id])
-
-  const handleStatusChange = async (applicationId: string, status: string) => {
-    setUpdatingId(applicationId)
-    try {
-      await api.updateEmployerApplicationStatus(applicationId, status)
-      toast.success('Application status updated')
-      fetchData()
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to update status')
-    } finally {
-      setUpdatingId(null)
-    }
+  const handleToggleFeatured = () => {
+    if (!job) return
+    toggleFeatured.mutate(job.id, {
+      onSuccess: (res) => toast.success(res.message),
+      onError: (error) => handleApiError(error, 'Failed to toggle featured'),
+    })
   }
 
-  const handleToggleFeatured = async () => {
-    try {
-      const res = await api.toggleEmployerJobFeatured(job.id)
-      toast.success(res.message)
-      fetchData()
-    } catch (err: any) {
-      toast.error(err.message || 'Failed to toggle featured')
-    }
-  }
-
-  if (loading) {
+  if (jobQuery.isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -115,12 +112,12 @@ export default function EmployerJobDetailPage() {
   }
 
   const statusCounts = {
-    PENDING: applications.filter((a: any) => a.status === 'PENDING').length,
-    REVIEWED: applications.filter((a: any) => a.status === 'REVIEWED').length,
-    SHORTLISTED: applications.filter((a: any) => a.status === 'SHORTLISTED').length,
-    ACCEPTED: applications.filter((a: any) => a.status === 'ACCEPTED').length,
-    REJECTED: applications.filter((a: any) => a.status === 'REJECTED').length,
-    HIRED: applications.filter((a: any) => a.status === 'HIRED').length,
+    PENDING: applications.filter((a) => a.status === 'PENDING').length,
+    REVIEWED: applications.filter((a) => a.status === 'REVIEWED').length,
+    SHORTLISTED: applications.filter((a) => a.status === 'SHORTLISTED').length,
+    ACCEPTED: applications.filter((a) => a.status === 'ACCEPTED').length,
+    REJECTED: applications.filter((a) => a.status === 'REJECTED').length,
+    HIRED: applications.filter((a) => a.status === 'HIRED').length,
   }
 
   return (
@@ -275,7 +272,7 @@ export default function EmployerJobDetailPage() {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {applications.map((app: any) => (
+                  {applications.map((app) => (
                     <div
                       key={app.id}
                       className={`rounded-xl border p-4 transition-all ${getAppStatusColor(app.status)}`}
@@ -300,8 +297,8 @@ export default function EmployerJobDetailPage() {
                         <div className="flex items-center gap-2 shrink-0">
                           <Select
                             value={app.status}
-                            onValueChange={(v) => handleStatusChange(app.id, v)}
-                            disabled={updatingId === app.id}
+                            onValueChange={(v) => handleStatusChange(app.id, v as ApplicationStatus)}
+                            disabled={updateStatus.isPending && updateStatus.variables?.applicationId === app.id}
                           >
                             <SelectTrigger className={`w-32 h-8 text-xs rounded-lg ${
                               app.status === 'HIRED' ? 'border-success text-success' :
@@ -334,7 +331,7 @@ export default function EmployerJobDetailPage() {
 
                       {expandedApp === app.id && (
                         <div className="mt-4 pt-3 border-t border-border/50 space-y-3">
-                          {app.user?.skills?.length > 0 && (
+                          {app.user?.skills && app.user.skills.length > 0 && (
                             <div>
                               <p className="text-xs font-medium text-muted-foreground mb-1.5">Skills</p>
                               <div className="flex flex-wrap gap-1">
@@ -353,7 +350,7 @@ export default function EmployerJobDetailPage() {
                             )}
                             <div className="flex items-center gap-1.5">
                               <Clock className="h-3 w-3" />
-                              Applied {new Date(app.appliedAt || app.createdAt).toLocaleDateString()}
+                              Applied {new Date(app.appliedAt).toLocaleDateString()}
                             </div>
                           </div>
                           {app.user?.resume && (

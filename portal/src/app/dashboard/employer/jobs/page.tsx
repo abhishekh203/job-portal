@@ -1,8 +1,11 @@
 'use client'
 
-import { useEffect, useState, useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import Link from 'next/link'
-import { api } from '@/lib/api'
+import { useQuery } from '@tanstack/react-query'
+import { type EmployerJob } from '@/lib/api'
+import { employerJobsQuery, useDeleteEmployerJob } from '@/features/employer/queries'
+import { handleApiError } from '@/lib/error-handler'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -31,40 +34,20 @@ const STATUS_FILTERS = [
 ]
 
 export default function EmployerJobsPage() {
-  const [jobs, setJobs] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
-  const [deleting, setDeleting] = useState<string | null>(null)
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
 
-  const fetchJobs = async () => {
-    try {
-      const response = await api.getEmployerJobs({ limit: 100 })
-      setJobs(response.data || [])
-    } catch (error) {
-      console.error('Failed to fetch jobs:', error)
-      toast.error('Failed to load jobs')
-    } finally {
-      setLoading(false)
-    }
-  }
+  const { data, isLoading, isError } = useQuery(employerJobsQuery({ limit: 100 }))
+  const jobs = useMemo(() => data?.data ?? [], [data])
 
-  useEffect(() => {
-    fetchJobs()
-  }, [])
+  const deleteJob = useDeleteEmployerJob()
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = (id: string) => {
     if (!confirm('Are you sure you want to delete this job?')) return
-    setDeleting(id)
-    try {
-      await api.deleteEmployerJob(id)
-      toast.success('Job deleted successfully')
-      fetchJobs()
-    } catch (error) {
-      toast.error('Failed to delete job')
-    } finally {
-      setDeleting(null)
-    }
+    deleteJob.mutate(id, {
+      onSuccess: () => toast.success('Job deleted successfully'),
+      onError: (error) => handleApiError(error, 'Failed to delete job'),
+    })
   }
 
   const filteredJobs = useMemo(() => {
@@ -78,7 +61,7 @@ export default function EmployerJobsPage() {
     })
   }, [jobs, search, statusFilter])
 
-  const getStatusBadge = (job: any) => {
+  const getStatusBadge = (job: EmployerJob) => {
     switch (job.status) {
       case 'APPROVED': return { label: 'Active', class: 'bg-success/10 text-success border-success/20' }
       case 'REJECTED': return { label: 'Rejected', class: 'bg-destructive/10 text-destructive border-destructive/20' }
@@ -87,10 +70,18 @@ export default function EmployerJobsPage() {
     }
   }
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    )
+  }
+
+  if (isError) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <p className="text-sm text-muted-foreground">Failed to load jobs. Please try again.</p>
       </div>
     )
   }
@@ -219,10 +210,10 @@ export default function EmployerJobsPage() {
                         size="icon"
                         className="h-9 w-9 rounded-lg text-destructive hover:text-destructive hover:bg-destructive/10"
                         onClick={() => handleDelete(job.id)}
-                        disabled={deleting === job.id}
+                        disabled={deleteJob.isPending && deleteJob.variables === job.id}
                         title="Delete job"
                       >
-                        {deleting === job.id ? (
+                        {deleteJob.isPending && deleteJob.variables === job.id ? (
                           <Loader2 className="h-4 w-4 animate-spin" />
                         ) : (
                           <Trash2 className="h-4 w-4" />

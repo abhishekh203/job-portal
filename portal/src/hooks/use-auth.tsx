@@ -50,7 +50,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const isAuthenticated = !!user
 
   const login = (token: string, userData: User) => {
-    localStorage.setItem('auth_token', token)
     api.setToken(token)
     setUser(userData)
     setLoading(false)
@@ -144,7 +143,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const logout = () => {
-    localStorage.removeItem('auth_token')
     api.clearToken()
     setUser(null)
     setLoading(false)
@@ -174,16 +172,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const initAuth = async () => {
-      const token = localStorage.getItem('auth_token')
+      // The API client reads the persisted token from storage on construction.
+      const token = api.getToken()
 
       if (token) {
-        api.setToken(token)
         try {
           setLoading(true)
           const userData = await api.getProfile()
           setUser(userData)
         } catch {
-          localStorage.removeItem('auth_token')
           api.clearToken()
           setUser(null)
         } finally {

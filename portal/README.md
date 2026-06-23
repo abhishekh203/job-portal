@@ -64,7 +64,7 @@ A modern, responsive job portal frontend built with Next.js 15, TypeScript, and 
 
    Update the environment variables:
    ```env
-   NEXT_PUBLIC_API_URL=http://localhost:3001/api
+   NEXT_PUBLIC_API_URL=http://localhost:5000/api
    NEXT_PUBLIC_APP_URL=http://localhost:3000
    ```
 
@@ -108,7 +108,7 @@ npm start
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `NEXT_PUBLIC_API_URL` | Backend API URL | `http://localhost:3001/api` |
+| `NEXT_PUBLIC_API_URL` | Backend API URL | `http://localhost:5000/api` |
 | `NEXT_PUBLIC_APP_URL` | Frontend app URL | `http://localhost:3000` |
 | `NEXT_PUBLIC_APP_NAME` | Application name | `JobPortal` |
 

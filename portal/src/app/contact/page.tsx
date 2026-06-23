@@ -1,13 +1,15 @@
 'use client'
 
-import { useState } from 'react'
 import Link from 'next/link'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
 import { useMutation } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import {
   Mail,
   Phone,
@@ -18,35 +20,30 @@ import {
   MessageSquare,
   Users,
   Briefcase,
-  Sparkles,
-  Lightbulb,
-  CheckCircle,
-  Headphones
 } from 'lucide-react'
 import { api } from '@/lib/api'
 import { toast } from 'sonner'
 
-interface ContactFormData {
-  name: string
-  email: string
-  subject: string
-  message: string
-}
+const contactSchema = z.object({
+  name: z.string().trim().min(1, 'Name is required'),
+  email: z.string().trim().min(1, 'Email is required').email('Enter a valid email address'),
+  subject: z.string().trim().min(1, 'Subject is required'),
+  message: z.string().trim().min(1, 'Message is required'),
+})
+type ContactFormValues = z.infer<typeof contactSchema>
 
 export default function ContactPage() {
-  const [formData, setFormData] = useState<ContactFormData>({
-    name: '',
-    email: '',
-    subject: '',
-    message: '',
+  const form = useForm<ContactFormValues>({
+    resolver: zodResolver(contactSchema),
+    defaultValues: { name: '', email: '', subject: '', message: '' },
   })
 
   const contactMutation = useMutation({
-    mutationFn: (data: ContactFormData) => api.submitContactForm(data),
+    mutationFn: (data: ContactFormValues) => api.submitContactForm(data),
     onSuccess: (response) => {
       if (response.success) {
-        toast.success('Message sent successfully! We&apos;ll get back to you soon.')
-        setFormData({ name: '', email: '', subject: '', message: '' })
+        toast.success("Message sent successfully! We'll get back to you soon.")
+        form.reset()
       } else {
         toast.error(response.message || 'Failed to send message. Please try again.')
       }
@@ -56,21 +53,7 @@ export default function ContactPage() {
     },
   })
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target
-    setFormData(prev => ({ ...prev, [name]: value }))
-  }
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-
-    if (!formData.name || !formData.email || !formData.subject || !formData.message) {
-      toast.error('Please fill in all fields')
-      return
-    }
-
-    contactMutation.mutate(formData)
-  }
+  const onSubmit = form.handleSubmit((values) => contactMutation.mutate(values))
 
   const contactInfo = [
     {
@@ -176,80 +159,83 @@ export default function ContactPage() {
               </h2>
               <Card className="shadow-lg">
                 <CardContent className="p-8">
-                  <form onSubmit={handleSubmit} className="space-y-6">
-                    <div className="grid gap-4 md:grid-cols-2">
-                      <div>
-                        <Label htmlFor="name">Name *</Label>
-                        <Input
-                          id="name"
+                  <Form {...form}>
+                    <form onSubmit={onSubmit} className="space-y-6">
+                      <div className="grid gap-4 md:grid-cols-2">
+                        <FormField
+                          control={form.control}
                           name="name"
-                          type="text"
-                          required
-                          value={formData.name}
-                          onChange={handleInputChange}
-                          placeholder="Your full name"
-                          disabled={contactMutation.isPending}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Name *</FormLabel>
+                              <FormControl>
+                                <Input type="text" placeholder="Your full name" disabled={contactMutation.isPending} {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
                         />
-                      </div>
-                      <div>
-                        <Label htmlFor="email">Email *</Label>
-                        <Input
-                          id="email"
+                        <FormField
+                          control={form.control}
                           name="email"
-                          type="email"
-                          required
-                          value={formData.email}
-                          onChange={handleInputChange}
-                          placeholder="your.email@example.com"
-                          disabled={contactMutation.isPending}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Email *</FormLabel>
+                              <FormControl>
+                                <Input type="email" placeholder="your.email@example.com" disabled={contactMutation.isPending} {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
                         />
                       </div>
-                    </div>
-                    <div>
-                      <Label htmlFor="subject">Subject *</Label>
-                      <Input
-                        id="subject"
+                      <FormField
+                        control={form.control}
                         name="subject"
-                        type="text"
-                        required
-                        value={formData.subject}
-                        onChange={handleInputChange}
-                        placeholder="What&apos;s this about?"
-                        disabled={contactMutation.isPending}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Subject *</FormLabel>
+                            <FormControl>
+                              <Input type="text" placeholder="What's this about?" disabled={contactMutation.isPending} {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
                       />
-                    </div>
-                    <div>
-                      <Label htmlFor="message">Message *</Label>
-                      <Textarea
-                        id="message"
+                      <FormField
+                        control={form.control}
                         name="message"
-                        required
-                        rows={6}
-                        value={formData.message}
-                        onChange={handleInputChange}
-                        placeholder="Tell us more about your inquiry..."
-                        className="resize-none"
-                        disabled={contactMutation.isPending}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Message *</FormLabel>
+                            <FormControl>
+                              <Textarea
+                                rows={6}
+                                placeholder="Tell us more about your inquiry..."
+                                className="resize-none"
+                                disabled={contactMutation.isPending}
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
                       />
-                    </div>
-                    <Button
-                      type="submit"
-                      disabled={contactMutation.isPending}
-                      className="w-full"
-                    >
-                      {contactMutation.isPending ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Sending...
-                        </>
-                      ) : (
-                        <>
-                          <Send className="mr-2 h-4 w-4" />
-                          Send Message
-                        </>
-                      )}
-                    </Button>
-                  </form>
+                      <Button type="submit" disabled={contactMutation.isPending} className="w-full">
+                        {contactMutation.isPending ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Sending...
+                          </>
+                        ) : (
+                          <>
+                            <Send className="mr-2 h-4 w-4" />
+                            Send Message
+                          </>
+                        )}
+                      </Button>
+                    </form>
+                  </Form>
                 </CardContent>
               </Card>
             </div>

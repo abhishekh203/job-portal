@@ -1,7 +1,12 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
 import { api } from '@/lib/api'
+import { useUpdateEmployerProfile } from '@/features/employer/queries'
+import { handleApiError } from '@/lib/error-handler'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -9,6 +14,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Loader2, Building2, Upload, Globe, Users, Tag, Save } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAuth } from '@/hooks/use-auth'
@@ -23,21 +29,39 @@ const COMPANY_SIZES = [
   { value: '1000+', label: '1000+ employees' },
 ]
 
+const companyFormSchema = z.object({
+  companyName: z.string().trim().min(1, 'Company name is required'),
+  industry: z.string().optional(),
+  companyDescription: z.string().optional(),
+  companySize: z.string().optional(),
+  companyWebsite: z.string().optional(),
+})
+type CompanyFormValues = z.infer<typeof companyFormSchema>
+
+const emptyCompanyForm: CompanyFormValues = {
+  companyName: '',
+  industry: '',
+  companyDescription: '',
+  companySize: '',
+  companyWebsite: '',
+}
+
 export default function CompanyProfilePage() {
   const { user, updateUserProfile } = useAuth()
-  const [loading, setLoading] = useState(false)
   const [uploadingLogo, setUploadingLogo] = useState(false)
-  const [form, setForm] = useState({
-    companyName: '',
-    companyDescription: '',
-    companyWebsite: '',
-    companySize: '',
-    industry: '',
+
+  const updateProfile = useUpdateEmployerProfile()
+  const isPending = updateProfile.isPending
+
+  const form = useForm<CompanyFormValues>({
+    resolver: zodResolver(companyFormSchema),
+    defaultValues: emptyCompanyForm,
   })
 
+  // Profile lives in the auth context; pre-fill the form once the user is available.
   useEffect(() => {
     if (user) {
-      setForm({
+      form.reset({
         companyName: user.companyName || '',
         companyDescription: user.companyDescription || '',
         companyWebsite: user.companyWebsite || '',
@@ -45,7 +69,7 @@ export default function CompanyProfilePage() {
         industry: user.industry || '',
       })
     }
-  }, [user])
+  }, [user, form])
 
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -57,40 +81,35 @@ export default function CompanyProfilePage() {
       await api.updateEmployerProfile({ companyLogo: result.url })
       updateUserProfile({ companyLogo: result.url })
       toast.success('Company logo updated')
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to upload logo')
+    } catch (error) {
+      handleApiError(error, 'Failed to upload logo')
     } finally {
       setUploadingLogo(false)
     }
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!form.companyName) {
-      toast.error('Company name is required')
-      return
-    }
+  const onSubmit = form.handleSubmit((values) => {
+    updateProfile.mutate(
+      {
+        companyName: values.companyName,
+        companyDescription: values.companyDescription || undefined,
+        companyWebsite: values.companyWebsite || undefined,
+        companySize: values.companySize || undefined,
+        industry: values.industry || undefined,
+      },
+      {
+        onSuccess: (data) => {
+          updateUserProfile(data.user)
+          toast.success('Company profile updated')
+        },
+        onError: (error) => handleApiError(error, 'Failed to update profile'),
+      }
+    )
+  })
 
-    setLoading(true)
-    try {
-      const updated = await api.updateEmployerProfile({
-        companyName: form.companyName,
-        companyDescription: form.companyDescription || undefined,
-        companyWebsite: form.companyWebsite || undefined,
-        companySize: form.companySize || undefined,
-        industry: form.industry || undefined,
-      })
-      updateUserProfile(updated.user || updated)
-      toast.success('Company profile updated')
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to update profile')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const initials = form.companyName
-    ? form.companyName.charAt(0).toUpperCase()
+  const companyName = form.watch('companyName')
+  const initials = companyName
+    ? companyName.charAt(0).toUpperCase()
     : user?.email?.charAt(0).toUpperCase() || 'C'
 
   return (
@@ -104,7 +123,7 @@ export default function CompanyProfilePage() {
       <Card className="border border-border/60">
         <CardContent className="p-6 flex flex-col sm:flex-row items-start sm:items-center gap-6">
           <Avatar className="h-20 w-20 rounded-2xl shrink-0">
-            <AvatarImage src={user?.companyLogo} alt={form.companyName} />
+            <AvatarImage src={user?.companyLogo} alt={companyName} />
             <AvatarFallback className="rounded-2xl bg-primary/10 text-primary text-2xl font-bold">
               {initials}
             </AvatarFallback>
@@ -139,114 +158,134 @@ export default function CompanyProfilePage() {
       </Card>
 
       {/* Company Info Form */}
-      <form onSubmit={handleSubmit}>
-        <Card className="border border-border/60">
-          <CardHeader>
-            <CardTitle className="text-base flex items-center gap-2">
-              <Building2 className="h-4 w-4 text-muted-foreground" />
-              Company Information
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-5">
-            <div className="grid sm:grid-cols-2 gap-5">
-              <div className="space-y-2">
-                <Label htmlFor="companyName">Company Name *</Label>
-                <div className="relative">
-                  <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="companyName"
-                    value={form.companyName}
-                    onChange={(e) => setForm({ ...form, companyName: e.target.value })}
-                    required
-                    disabled={loading}
-                    className="pl-9 rounded-xl"
-                  />
-                </div>
+      <Form {...form}>
+        <form onSubmit={onSubmit}>
+          <Card className="border border-border/60">
+            <CardHeader>
+              <CardTitle className="text-base flex items-center gap-2">
+                <Building2 className="h-4 w-4 text-muted-foreground" />
+                Company Information
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-5">
+              <div className="grid sm:grid-cols-2 gap-5">
+                <FormField
+                  control={form.control}
+                  name="companyName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Company Name *</FormLabel>
+                      <div className="relative">
+                        <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
+                        <FormControl>
+                          <Input disabled={isPending} className="pl-9 rounded-xl" {...field} />
+                        </FormControl>
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="industry"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Industry</FormLabel>
+                      <div className="relative">
+                        <Tag className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
+                        <FormControl>
+                          <Input placeholder="e.g. Technology, Healthcare" disabled={isPending} className="pl-9 rounded-xl" {...field} />
+                        </FormControl>
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="industry">Industry</Label>
-                <div className="relative">
-                  <Tag className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="industry"
-                    value={form.industry}
-                    onChange={(e) => setForm({ ...form, industry: e.target.value })}
-                    placeholder="e.g. Technology, Healthcare"
-                    disabled={loading}
-                    className="pl-9 rounded-xl"
-                  />
-                </div>
-              </div>
-            </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="companyDescription">Company Description</Label>
-              <Textarea
-                id="companyDescription"
-                value={form.companyDescription}
-                onChange={(e) => setForm({ ...form, companyDescription: e.target.value })}
-                placeholder="Tell applicants about your company culture, mission, and what makes you unique..."
-                rows={4}
-                disabled={loading}
-                className="rounded-xl"
-              />
-            </div>
-
-            <div className="grid sm:grid-cols-2 gap-5">
-              <div className="space-y-2">
-                <Label htmlFor="companySize">Company Size</Label>
-                <Select
-                  value={form.companySize}
-                  onValueChange={(v) => setForm({ ...form, companySize: v })}
-                  disabled={loading}
-                >
-                  <SelectTrigger className="rounded-xl">
-                    <Users className="h-4 w-4 mr-2 text-muted-foreground" />
-                    <SelectValue placeholder="Select size" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {COMPANY_SIZES.map((size) => (
-                      <SelectItem key={size.value} value={size.value}>{size.label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="companyWebsite">Company Website</Label>
-                <div className="relative">
-                  <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="companyWebsite"
-                    value={form.companyWebsite}
-                    onChange={(e) => setForm({ ...form, companyWebsite: e.target.value })}
-                    placeholder="https://example.com"
-                    disabled={loading}
-                    className="pl-9 rounded-xl"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <Separator />
-
-            <div className="flex justify-end">
-              <Button type="submit" disabled={loading} className="rounded-xl px-8">
-                {loading ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Saving...
-                  </>
-                ) : (
-                  <>
-                    <Save className="h-4 w-4 mr-2" />
-                    Save Changes
-                  </>
+              <FormField
+                control={form.control}
+                name="companyDescription"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Company Description</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Tell applicants about your company culture, mission, and what makes you unique..."
+                        rows={4}
+                        disabled={isPending}
+                        className="rounded-xl"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
                 )}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </form>
+              />
+
+              <div className="grid sm:grid-cols-2 gap-5">
+                <FormField
+                  control={form.control}
+                  name="companySize"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Company Size</FormLabel>
+                      <Select value={field.value} onValueChange={field.onChange} disabled={isPending}>
+                        <FormControl>
+                          <SelectTrigger className="rounded-xl">
+                            <Users className="h-4 w-4 mr-2 text-muted-foreground" />
+                            <SelectValue placeholder="Select size" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {COMPANY_SIZES.map((size) => (
+                            <SelectItem key={size.value} value={size.value}>{size.label}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="companyWebsite"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Company Website</FormLabel>
+                      <div className="relative">
+                        <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
+                        <FormControl>
+                          <Input placeholder="https://example.com" disabled={isPending} className="pl-9 rounded-xl" {...field} />
+                        </FormControl>
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <Separator />
+
+              <div className="flex justify-end">
+                <Button type="submit" disabled={isPending} className="rounded-xl px-8">
+                  {isPending ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="h-4 w-4 mr-2" />
+                      Save Changes
+                    </>
+                  )}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </form>
+      </Form>
     </div>
   )
 }

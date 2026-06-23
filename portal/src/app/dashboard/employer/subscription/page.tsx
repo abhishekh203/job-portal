@@ -1,7 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { api } from '@/lib/api'
+import { useQuery } from '@tanstack/react-query'
+import { employerPlansQuery, employerSubscriptionQuery, useSubscribeToPlan } from '@/features/employer/queries'
+import { handleApiError } from '@/lib/error-handler'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -9,48 +10,33 @@ import { Loader2, Check, Lock, Sparkles, Star, Zap, Shield } from 'lucide-react'
 import { toast } from 'sonner'
 
 export default function EmployerSubscriptionPage() {
-  const [plans, setPlans] = useState<any[]>([])
-  const [subscription, setSubscription] = useState<{ subscribed: boolean; subscription?: any } | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [subscribing, setSubscribing] = useState<string | null>(null)
+  const plansQuery = useQuery(employerPlansQuery())
+  const subQuery = useQuery(employerSubscriptionQuery())
 
-  const fetchData = async () => {
-    try {
-      const [plansData, subData] = await Promise.all([
-        api.getEmployerPlans(),
-        api.getEmployerSubscription(),
-      ])
-      setPlans(plansData || [])
-      setSubscription(subData)
-    } catch (error) {
-      console.error('Failed to fetch subscription data:', error)
-      toast.error('Failed to load subscription data')
-    } finally {
-      setLoading(false)
-    }
+  const plans = plansQuery.data ?? []
+  const subscription = subQuery.data
+
+  const subscribe = useSubscribeToPlan()
+
+  const handleSubscribe = (planId: string) => {
+    subscribe.mutate(planId, {
+      onSuccess: (result) => toast.success(result.message),
+      onError: (error) => handleApiError(error, 'Failed to subscribe'),
+    })
   }
 
-  useEffect(() => {
-    fetchData()
-  }, [])
-
-  const handleSubscribe = async (planId: string) => {
-    setSubscribing(planId)
-    try {
-      const result = await api.subscribeToPlan(planId)
-      toast.success(result.message)
-      fetchData()
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to subscribe')
-    } finally {
-      setSubscribing(null)
-    }
-  }
-
-  if (loading) {
+  if (plansQuery.isLoading || subQuery.isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    )
+  }
+
+  if (plansQuery.isError || subQuery.isError) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <p className="text-sm text-muted-foreground">Failed to load subscription data. Please try again.</p>
       </div>
     )
   }
@@ -120,7 +106,7 @@ export default function EmployerSubscriptionPage() {
             No subscription plans are available at the moment.
           </p>
         ) : (
-          plans.map((plan: any, index: number) => {
+          plans.map((plan, index) => {
             const isCurrentPlan = currentPlanId === plan.id
             const isSubscribed = currentSub && currentSub.status === 'ACTIVE'
             const PlanIcon = planIcons[index] || Star
@@ -170,7 +156,7 @@ export default function EmployerSubscriptionPage() {
                         {plan.featuredJobLimit != null ? `Up to ${plan.featuredJobLimit} featured jobs` : 'Unlimited featured jobs'}
                       </span>
                     </li>
-                    {(plan.features as string[])?.map((feature: string, i: number) => (
+                    {plan.features?.map((feature, i) => (
                       <li key={i} className="flex items-start gap-3 text-sm">
                         <Check className="h-4 w-4 text-success mt-0.5 shrink-0" />
                         <span className="text-muted-foreground">
@@ -185,10 +171,10 @@ export default function EmployerSubscriptionPage() {
                   <Button
                     className="w-full rounded-xl"
                     variant={isCurrentPlan ? 'outline' : 'default'}
-                    disabled={isCurrentPlan || isSubscribed || subscribing === plan.id}
+                    disabled={isCurrentPlan || !!isSubscribed || (subscribe.isPending && subscribe.variables === plan.id)}
                     onClick={() => handleSubscribe(plan.id)}
                   >
-                    {subscribing === plan.id ? (
+                    {subscribe.isPending && subscribe.variables === plan.id ? (
                       <>
                         <Loader2 className="h-4 w-4 animate-spin mr-2" />
                         Processing...

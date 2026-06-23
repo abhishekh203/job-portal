@@ -170,6 +170,175 @@ export interface JobFilters {
   salaryMax?: number
 }
 
+// ── Shared status enums (mirror Prisma) ───────────────────────
+export type JobStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'RESUBMITTED'
+export type ApplicationStatus = 'PENDING' | 'REVIEWED' | 'SHORTLISTED' | 'ACCEPTED' | 'REJECTED' | 'HIRED'
+export type SubscriptionStatus = 'PENDING' | 'TRIALING' | 'ACTIVE' | 'EXPIRED' | 'CANCELLED'
+
+// Generic `{ data, pagination }` envelope returned by employer/admin list endpoints
+export interface PaginatedData<T> {
+  data: T[]
+  pagination: PaginationInfo
+}
+
+// ── Employer: jobs ────────────────────────────────────────────
+export interface EmployerJob extends Job {
+  status: JobStatus
+  source?: 'ADMIN' | 'EMPLOYER'
+  viewCount?: number
+  rejectionReason?: string | null
+  postedById?: string | null
+  isApproved?: boolean
+  _count?: { applications: number }
+}
+
+// Payload sent to create/update a job. Salary fields are numbers here
+// (the form collects strings and converts before calling the API).
+export interface EmployerJobInput {
+  title: string
+  description: string
+  category: string
+  location: string
+  jobType: string
+  workLocationType: string
+  experienceLevel: string
+  currency?: string
+  salaryMin?: number
+  salaryMax?: number
+  salaryNegotiable?: boolean
+  applicationDeadline?: string
+  requirements?: string[]
+  responsibilities?: string[]
+}
+
+export interface EmployerJobsParams {
+  page?: number
+  limit?: number
+  search?: string
+  status?: string
+}
+
+// ── Employer: applications ────────────────────────────────────
+export interface EmployerApplicant {
+  id: string
+  firstName?: string
+  lastName?: string
+  email: string
+  profilePicture?: string
+  resume?: string
+  skills?: string[]
+  experience?: string
+  education?: string
+  location?: string
+  linkedin?: string
+  github?: string
+  website?: string
+}
+
+export interface EmployerApplication {
+  id: string
+  message?: string
+  status: ApplicationStatus
+  appliedAt: string
+  updatedAt: string
+  userId: string
+  jobId: string
+  user: EmployerApplicant
+}
+
+export interface EmployerApplicationsParams {
+  page?: number
+  limit?: number
+  status?: string
+}
+
+// ── Employer: dashboard ───────────────────────────────────────
+export interface EmployerRecentApplicant {
+  id: string
+  applicantName: string
+  applicantAvatar?: string | null
+  jobTitle: string
+  jobSlug: string
+  status: ApplicationStatus
+  appliedAt: string
+}
+
+export interface EmployerApplicationBreakdown {
+  status: ApplicationStatus
+  _count: { id: number }
+}
+
+export interface EmployerDashboardStats {
+  totalJobs: number
+  activeJobs: number
+  pendingJobs: number
+  rejectedJobs: number
+  totalApplications: number
+  jobsExpiringSoon: number
+  totalViews: number
+  applicationRate: number
+  applicationBreakdown: EmployerApplicationBreakdown[]
+  recentApplicants: EmployerRecentApplicant[]
+}
+
+// ── Employer: profile ─────────────────────────────────────────
+export interface EmployerProfileInput {
+  companyName?: string
+  companyDescription?: string
+  companyWebsite?: string
+  companySize?: string
+  industry?: string
+  companyLogo?: string
+}
+
+// ── Subscription plans ────────────────────────────────────────
+export interface SubscriptionPlan {
+  id: string
+  name: string
+  slug: string
+  description?: string | null
+  price: number
+  duration: 'MONTHLY' | 'YEARLY'
+  features: string[]
+  jobLimit: number | null
+  featuredJobLimit: number | null
+  sortOrder: number
+  isActive: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+export interface SubscriptionUsage {
+  jobLimit: number | null
+  jobsUsed: number
+  jobsRemaining: number | null
+  featuredJobLimit: number | null
+  featuredUsed: number
+  featuredRemaining: number | null
+  features: string[]
+}
+
+export interface EmployerSubscription {
+  id: string
+  employerId: string
+  planId: string
+  plan: SubscriptionPlan
+  status: SubscriptionStatus
+  currentPeriodStart: string
+  currentPeriodEnd: string
+  trialEndsAt?: string | null
+  autoRenew: boolean
+  cancelledAt?: string | null
+  createdAt: string
+  updatedAt: string
+  usage?: SubscriptionUsage
+}
+
+export interface EmployerSubscriptionResponse {
+  subscribed: boolean
+  subscription?: EmployerSubscription
+}
+
 // API Client Class
 class ApiClient {
   private baseURL: string
@@ -181,6 +350,10 @@ class ApiClient {
     if (typeof window !== 'undefined') {
       this.token = localStorage.getItem('auth_token')
     }
+  }
+
+  getToken(): string | null {
+    return this.token
   }
 
   setToken(token: string) {
@@ -342,63 +515,63 @@ class ApiClient {
   }
 
   // Employer endpoints
-  async getEmployerDashboard(): Promise<any> {
-    return this.request<any>('/employer/dashboard/stats')
+  async getEmployerDashboard(): Promise<EmployerDashboardStats> {
+    return this.request<EmployerDashboardStats>('/employer/dashboard/stats')
   }
 
-  async getEmployerJobs(params: Record<string, any> = {}): Promise<any> {
+  async getEmployerJobs(params: EmployerJobsParams = {}): Promise<PaginatedData<EmployerJob>> {
     const searchParams = new URLSearchParams()
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined && value !== null && value !== '') {
         searchParams.append(key, String(value))
       }
     })
-    return this.request<any>(`/employer/jobs?${searchParams}`)
+    return this.request<PaginatedData<EmployerJob>>(`/employer/jobs?${searchParams}`)
   }
 
-  async createEmployerJob(data: any): Promise<any> {
-    return this.request<any>('/employer/jobs', {
+  async createEmployerJob(data: EmployerJobInput): Promise<{ message: string; job: EmployerJob }> {
+    return this.request<{ message: string; job: EmployerJob }>('/employer/jobs', {
       method: 'POST',
       body: JSON.stringify(data),
     })
   }
 
-  async getEmployerJob(id: string): Promise<any> {
-    return this.request<any>(`/employer/jobs/${id}`)
+  async getEmployerJob(id: string): Promise<{ job: EmployerJob }> {
+    return this.request<{ job: EmployerJob }>(`/employer/jobs/${id}`)
   }
 
-  async updateEmployerJob(id: string, data: any): Promise<any> {
-    return this.request<any>(`/employer/jobs/${id}`, {
+  async updateEmployerJob(id: string, data: Partial<EmployerJobInput>): Promise<{ message: string; job: EmployerJob }> {
+    return this.request<{ message: string; job: EmployerJob }>(`/employer/jobs/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data),
     })
   }
 
-  async deleteEmployerJob(id: string): Promise<any> {
-    return this.request<any>(`/employer/jobs/${id}`, {
+  async deleteEmployerJob(id: string): Promise<{ message: string }> {
+    return this.request<{ message: string }>(`/employer/jobs/${id}`, {
       method: 'DELETE',
     })
   }
 
-  async getEmployerApplications(jobId: string, params: Record<string, any> = {}): Promise<any> {
+  async getEmployerApplications(jobId: string, params: EmployerApplicationsParams = {}): Promise<PaginatedData<EmployerApplication>> {
     const searchParams = new URLSearchParams()
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined && value !== null && value !== '') {
         searchParams.append(key, String(value))
       }
     })
-    return this.request<any>(`/employer/jobs/${jobId}/applications?${searchParams}`)
+    return this.request<PaginatedData<EmployerApplication>>(`/employer/jobs/${jobId}/applications?${searchParams}`)
   }
 
-  async updateEmployerApplicationStatus(applicationId: string, status: string): Promise<any> {
-    return this.request<any>(`/employer/applications/${applicationId}/status`, {
+  async updateEmployerApplicationStatus(applicationId: string, status: ApplicationStatus): Promise<{ message: string; application: EmployerApplication }> {
+    return this.request<{ message: string; application: EmployerApplication }>(`/employer/applications/${applicationId}/status`, {
       method: 'PUT',
       body: JSON.stringify({ status }),
     })
   }
 
-  async updateEmployerProfile(data: any): Promise<any> {
-    return this.request<any>('/employer/profile', {
+  async updateEmployerProfile(data: EmployerProfileInput): Promise<{ message: string; user: User }> {
+    return this.request<{ message: string; user: User }>('/employer/profile', {
       method: 'PUT',
       body: JSON.stringify(data),
     })
@@ -406,23 +579,23 @@ class ApiClient {
 
   // Company endpoints
   // Subscription / Plan endpoints
-  async getEmployerPlans(): Promise<any[]> {
-    return this.request<any[]>('/employer/plans')
+  async getEmployerPlans(): Promise<SubscriptionPlan[]> {
+    return this.request<SubscriptionPlan[]>('/employer/plans')
   }
 
-  async subscribeToPlan(planId: string): Promise<{ message: string; sub: any }> {
-    return this.request<{ message: string; sub: any }>('/employer/subscribe', {
+  async subscribeToPlan(planId: string): Promise<{ message: string; sub: EmployerSubscription }> {
+    return this.request<{ message: string; sub: EmployerSubscription }>('/employer/subscribe', {
       method: 'POST',
       body: JSON.stringify({ planId }),
     })
   }
 
-  async getEmployerSubscription(): Promise<{ subscribed: boolean; subscription?: any }> {
-    return this.request<{ subscribed: boolean; subscription?: any }>('/employer/subscription')
+  async getEmployerSubscription(): Promise<EmployerSubscriptionResponse> {
+    return this.request<EmployerSubscriptionResponse>('/employer/subscription')
   }
 
-  async toggleEmployerJobFeatured(jobId: string): Promise<{ message: string; job: any }> {
-    return this.request<{ message: string; job: any }>(`/employer/jobs/${jobId}/toggle-featured`, {
+  async toggleEmployerJobFeatured(jobId: string): Promise<{ message: string; job: EmployerJob }> {
+    return this.request<{ message: string; job: EmployerJob }>(`/employer/jobs/${jobId}/toggle-featured`, {
       method: 'PUT',
     })
   }
@@ -551,13 +724,7 @@ export const formatSalary = (min?: number, max?: number, negotiable?: boolean): 
   return 'Not specified'
 }
 
-export const formatDate = (dateString: string): string => {
-  return new Date(dateString).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  })
-}
+// formatDate lives in '@/lib/utils' — the single canonical date formatter.
 
 export const getJobTypeLabel = (type: string): string => {
   const labels: Record<string, string> = {
