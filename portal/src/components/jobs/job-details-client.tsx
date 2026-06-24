@@ -5,7 +5,6 @@ import Link from "next/link"
 import { useAuth } from "@/hooks/use-auth"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
@@ -31,7 +30,6 @@ import {
   Clock,
   DollarSign,
   Calendar,
-  ArrowLeft,
   ExternalLink,
   Loader2,
   Star,
@@ -132,21 +130,12 @@ export function JobDetailsClient({ job, hasApplied }: JobDetailsClientProps) {
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Back Link */}
-        <Link
-          href="/jobs"
-          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6 group"
-        >
-          <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
-          Back to Jobs
-        </Link>
-
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Main Content - Left 2/3 */}
           <div className="lg:col-span-2 space-y-8">
             {/* Job Header */}
-            <Card className="border border-border/60">
-              <CardContent className="p-6 lg:p-8">
+            <div className="pb-2">
+              <div>
                 <div className="flex items-start gap-5 mb-6">
                   {job.companyLogo ? (
                     <img src={job.companyLogo} alt="" className="w-16 h-16 rounded-xl object-cover border border-border/50 shrink-0" />
@@ -217,78 +206,64 @@ export function JobDetailsClient({ job, hasApplied }: JobDetailsClientProps) {
                     Posted {formatDate(job.createdAt)}
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
 
             {/* Job Description */}
-            <Card className="border border-border/60">
-              <CardHeader>
-                <CardTitle className="text-lg font-semibold flex items-center gap-2">
-                  <FileText className="h-5 w-5 text-primary" />
-                  Job Description
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div
-                  className="prose prose-sm max-w-none prose-headings:font-semibold prose-headings:text-foreground prose-p:text-muted-foreground prose-p:leading-relaxed prose-strong:text-foreground prose-ul:text-muted-foreground prose-li:text-muted-foreground"
-                  dangerouslySetInnerHTML={{ __html: sanitizeHtml(job.description) }}
-                />
-              </CardContent>
-            </Card>
+            <section className="border-t border-border/60 pt-8">
+              <h2 className="text-lg font-semibold flex items-center gap-2 mb-4">
+                <FileText className="h-5 w-5 text-primary" />
+                Job Description
+              </h2>
+              <div
+                className="prose prose-sm max-w-none prose-headings:font-semibold prose-headings:text-foreground prose-p:text-muted-foreground prose-p:leading-relaxed prose-strong:text-foreground prose-ul:text-muted-foreground prose-li:text-muted-foreground"
+                dangerouslySetInnerHTML={{ __html: sanitizeHtml(job.description) }}
+              />
+            </section>
 
             {/* Responsibilities */}
             {job.responsibilities && job.responsibilities.length > 0 && (
-              <Card className="border border-border/60">
-                <CardHeader>
-                  <CardTitle className="text-lg font-semibold flex items-center gap-2">
-                    <Target className="h-5 w-5 text-primary" />
-                    Responsibilities
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-3">
-                    {job.responsibilities.map((res, idx) => (
-                      <li key={idx} className="flex items-start gap-3 text-sm text-muted-foreground">
-                        <div className="h-1.5 w-1.5 rounded-full bg-primary mt-2 shrink-0" />
-                        {res}
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
+              <section className="border-t border-border/60 pt-8">
+                <h2 className="text-lg font-semibold flex items-center gap-2 mb-4">
+                  <Target className="h-5 w-5 text-primary" />
+                  Responsibilities
+                </h2>
+                <ul className="space-y-3">
+                  {job.responsibilities.map((res, idx) => (
+                    <li key={idx} className="flex items-start gap-3 text-sm text-muted-foreground">
+                      <div className="h-1.5 w-1.5 rounded-full bg-primary mt-2 shrink-0" />
+                      {res}
+                    </li>
+                  ))}
+                </ul>
+              </section>
             )}
 
             {/* Requirements */}
             {job.requirements && job.requirements.length > 0 && (
-              <Card className="border border-border/60">
-                <CardHeader>
-                  <CardTitle className="text-lg font-semibold flex items-center gap-2">
-                    <ListChecks className="h-5 w-5 text-primary" />
-                    Job Requirements
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-3">
-                    {job.requirements.map((req, idx) => (
-                      <li key={idx} className="flex items-start gap-3 text-sm text-muted-foreground">
-                        <CheckCircle className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                        {req}
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
+              <section className="border-t border-border/60 pt-8">
+                <h2 className="text-lg font-semibold flex items-center gap-2 mb-4">
+                  <ListChecks className="h-5 w-5 text-primary" />
+                  Job Requirements
+                </h2>
+                <ul className="space-y-3">
+                  {job.requirements.map((req, idx) => (
+                    <li key={idx} className="flex items-start gap-3 text-sm text-muted-foreground">
+                      <CheckCircle className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                      {req}
+                    </li>
+                  ))}
+                </ul>
+              </section>
             )}
 
             {/* About the Company */}
-            <Card className="border border-border/60">
-              <CardHeader>
-                <CardTitle className="text-lg font-semibold flex items-center gap-2">
-                  <Building2 className="h-5 w-5 text-primary" />
-                  About {job.companyName}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
+            <section className="border-t border-border/60 pt-8">
+              <h2 className="text-lg font-semibold flex items-center gap-2 mb-4">
+                <Building2 className="h-5 w-5 text-primary" />
+                About {job.companyName}
+              </h2>
+              <div>
                 <div className="flex items-start gap-4">
                   {job.companyLogo ? (
                     <img src={job.companyLogo} alt="" className="w-14 h-14 rounded-xl object-cover border border-border/50 shrink-0" />
@@ -321,19 +296,17 @@ export function JobDetailsClient({ job, hasApplied }: JobDetailsClientProps) {
                     </div>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </section>
 
             {/* FAQs about this job */}
             {faqs.length > 0 && (
-              <Card className="border border-border/60">
-                <CardHeader>
-                  <CardTitle className="text-lg font-semibold flex items-center gap-2">
-                    <HelpCircle className="h-5 w-5 text-primary" />
-                    FAQs about this job
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="divide-y divide-border/50">
+              <section className="border-t border-border/60 pt-8">
+                <h2 className="text-lg font-semibold flex items-center gap-2 mb-2">
+                  <HelpCircle className="h-5 w-5 text-primary" />
+                  FAQs about this job
+                </h2>
+                <div className="divide-y divide-border/50">
                   {faqs.map((faq, idx) => (
                     <div key={idx} className="py-1">
                       <button
@@ -352,107 +325,104 @@ export function JobDetailsClient({ job, hasApplied }: JobDetailsClientProps) {
                       )}
                     </div>
                   ))}
-                </CardContent>
-              </Card>
+                </div>
+              </section>
             )}
           </div>
 
           {/* Sidebar - Right 1/3 */}
           <div className="lg:col-span-1 space-y-6">
-            {/* Apply Card (sticky) */}
-            <div className="lg:sticky lg:top-24 space-y-6">
-              <Card className="border border-border/60">
-                <CardContent className="p-6">
-                  {hasApplied ? (
-                    <div className="text-center py-4">
-                      <CheckCircle className="h-10 w-10 text-success mx-auto mb-3" />
-                      <p className="font-semibold text-foreground">Application Submitted</p>
-                      <p className="text-sm text-muted-foreground mt-1">You have already applied for this position.</p>
-                    </div>
-                  ) : job.isActive ? (
-                    <>
-                      <h3 className="font-semibold text-foreground mb-2">Apply for this job</h3>
-                      <p className="text-sm text-muted-foreground mb-5">
-                        Submit your application to {job.companyName}.
-                      </p>
-                      <Button
-                        className="w-full h-12 rounded-xl gradient-primary shadow-md hover:shadow-lg transition-all"
-                        onClick={() => checkProfileCompletion() && setIsApplyDialogOpen(true)}
-                      >
-                        <Rocket className="h-4 w-4 mr-2" />
-                        Apply Now
-                      </Button>
-                    </>
-                  ) : (
-                    <div className="text-center py-4">
-                      <Briefcase className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
-                      <p className="font-semibold text-foreground">Position Closed</p>
-                      <p className="text-sm text-muted-foreground mt-1">This job is no longer accepting applications.</p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+            {/* Apply block (sticky) */}
+            <div className="lg:sticky lg:top-24 divide-y divide-border/60">
+              <div className="pb-6">
+                {hasApplied ? (
+                  <div className="text-center py-4">
+                    <CheckCircle className="h-10 w-10 text-success mx-auto mb-3" />
+                    <p className="font-semibold text-foreground">Application Submitted</p>
+                    <p className="text-sm text-muted-foreground mt-1">You have already applied for this position.</p>
+                  </div>
+                ) : job.isActive ? (
+                  <>
+                    <h3 className="font-semibold text-foreground mb-2">Apply for this job</h3>
+                    <p className="text-sm text-muted-foreground mb-5">
+                      Submit your application to {job.companyName}.
+                    </p>
+                    <Button
+                      className="w-full h-12 rounded-xl gradient-primary shadow-md hover:shadow-lg transition-all"
+                      onClick={() => checkProfileCompletion() && setIsApplyDialogOpen(true)}
+                    >
+                      <Rocket className="h-4 w-4 mr-2" />
+                      Apply Now
+                    </Button>
+                  </>
+                ) : (
+                  <div className="text-center py-4">
+                    <Briefcase className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
+                    <p className="font-semibold text-foreground">Position Closed</p>
+                    <p className="text-sm text-muted-foreground mt-1">This job is no longer accepting applications.</p>
+                  </div>
+                )}
+              </div>
 
-              {/* Salary Card */}
+              {/* Salary */}
               {(job.salaryMin || job.salaryMax || job.salaryNegotiable) && (
-                <Card className="border border-border/60">
-                  <CardContent className="p-6">
-                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Salary Range</p>
-                    <p className="text-xl font-bold text-foreground">{formatSalary(job.salaryMin, job.salaryMax, job.salaryNegotiable)}</p>
-                    <p className="text-xs text-muted-foreground mt-1">{job.currency || 'NPR'}</p>
-                  </CardContent>
-                </Card>
+                <div className="py-6">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Salary Range</p>
+                  <p className="text-xl font-bold text-foreground">{formatSalary(job.salaryMin, job.salaryMax, job.salaryNegotiable)}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{job.currency || 'NPR'}</p>
+                </div>
               )}
 
-              {/* Company Card */}
-              <Card className="border border-border/60">
-                <CardContent className="p-6">
-                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">About the Company</p>
-                  <div className="flex items-center gap-4 mb-4">
-                    {job.companyLogo ? (
-                      <img src={job.companyLogo} alt="" className="w-12 h-12 rounded-xl object-cover border border-border/50" />
-                    ) : (
-                      <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                        <Building2 className="h-6 w-6 text-primary" />
-                      </div>
-                    )}
-                    <div>
-                      {job.companySlug ? (
-                        <Link href={`/companies/${job.companySlug}`} className="font-semibold text-foreground hover:text-primary transition-colors">
-                          {job.companyName}
-                        </Link>
-                      ) : (
-                        <p className="font-semibold text-foreground">{job.companyName}</p>
-                      )}
-                      <p className="text-sm text-muted-foreground">{job.location}</p>
+              {/* Company */}
+              <div className="py-6">
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">About the Company</p>
+                <div className="flex items-center gap-4 mb-4">
+                  {job.companyLogo ? (
+                    <img src={job.companyLogo} alt="" className="w-12 h-12 rounded-xl object-cover border border-border/50" />
+                  ) : (
+                    <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                      <Building2 className="h-6 w-6 text-primary" />
                     </div>
-                  </div>
-                  {job.companyWebsite && (
-                    <Button variant="outline" size="sm" asChild className="w-full rounded-xl">
-                      <Link href={job.companyWebsite} target="_blank" rel="noopener noreferrer">
-                        <ExternalLink className="h-4 w-4 mr-2" />
-                        Visit Website
-                      </Link>
-                    </Button>
                   )}
-                </CardContent>
-              </Card>
+                  <div>
+                    {job.companySlug ? (
+                      <Link href={`/companies/${job.companySlug}`} className="font-semibold text-foreground hover:text-primary transition-colors">
+                        {job.companyName}
+                      </Link>
+                    ) : (
+                      <p className="font-semibold text-foreground">{job.companyName}</p>
+                    )}
+                    <p className="text-sm text-muted-foreground">{job.location}</p>
+                  </div>
+                </div>
+                {job.companyWebsite && (
+                  <Button variant="outline" size="sm" asChild className="w-full rounded-xl">
+                    <Link href={job.companyWebsite} target="_blank" rel="noopener noreferrer">
+                      <ExternalLink className="h-4 w-4 mr-2" />
+                      Visit Website
+                    </Link>
+                  </Button>
+                )}
+              </div>
 
               {/* Share */}
-              <Button
-                variant="ghost"
-                className="w-full rounded-xl text-muted-foreground"
-                onClick={() => {
-                  navigator.share?.({
-                    title: job.title,
-                    text: `Check out this job at ${job.companyName}`,
-                    url: window.location.href,
-                  })
-                }}
-              >
-                <Share2 className="h-4 w-4 mr-2" />
-                Share This Job
-              </Button>
+              <div className="pt-6">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full rounded-xl"
+                  onClick={() => {
+                    navigator.share?.({
+                      title: job.title,
+                      text: `Check out this job at ${job.companyName}`,
+                      url: window.location.href,
+                    })
+                  }}
+                >
+                  <Share2 className="h-4 w-4 mr-2" />
+                  Share This Job
+                </Button>
+              </div>
             </div>
           </div>
         </div>

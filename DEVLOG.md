@@ -77,6 +77,12 @@ Each entry: what was asked → what was done → files touched → commit (if pu
   documented the missing **AuditLog** model, fixed `npm start` command, and linked the new
   CLAUDE.md/ARCHITECTURE.md guides. Files: `AGENTS.md`.
 
+### 12. Job detail page → flat "paper" layout
+- Converted the boxed `Card` sections (header, description, responsibilities, requirements, about,
+  FAQs, and the sidebar apply/salary/company blocks) to plain sections separated by thin top-border
+  rules — no card borders/shadows. Removed the "Back to Jobs" link and unused `Card`/`ArrowLeft`
+  imports. File: `portal/src/components/jobs/job-details-client.tsx`.
+
 ### 11. Reworked popular-search tiles to use real fields
 - "Jobs for Women" was faked via `?search=women` (keyword search, no backing field) → replaced with
   **Internships** (`?jobType=INTERNSHIP`). Also added **Contract Jobs** (`?jobType=CONTRACT`) and
