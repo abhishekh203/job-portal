@@ -43,18 +43,12 @@
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
 
-<<<<<<< Updated upstream
-  /* Fonts */
-  --font-sans: var(--font-inter);
-  --font-heading: var(--font-urbanist);
-=======
   /* Fonts — Inter carries all body + UI text (legible at small sizes across
      listings, tables, forms); Montserrat is reserved for headings/display;
      serif only for pull-quotes; mono only for actual code. */
   --font-sans: var(--font-inter);
   --font-heading: var(--font-montserrat);
   --font-serif: var(--font-source-serif);
->>>>>>> Stashed changes
   --font-mono: var(--font-jetbrains-mono);
 
   /* Parchment surface system (ElevenLabs-style) — neutral warm whites */
@@ -92,8 +86,6 @@
   --radius-xl: calc(var(--radius) + 4px);
 }
 
-<<<<<<< Updated upstream
-=======
 /* ──────────────────────────────────────────────────────────────
    Workable palette — warm portrait gallery on cream paper. Mapped
    onto the standard shadcn token names so every component adapts
@@ -103,122 +95,9 @@
    never from drop shadows. Forest Teal is the brand primary; pastels
    (apricot / sky / peach) differentiate secondary surfaces.
    ────────────────────────────────────────────────────────────── */
->>>>>>> Stashed changes
 :root {
   --radius: 0.75rem;               /* 12px — friendly but tighter for a pro hiring tool */
 
-<<<<<<< Updated upstream
-  /* 🔵 Primary (Action) - Royal Blue #2563EB */
-  --primary: oklch(0.55 0.22 264);
-  --primary-foreground: oklch(0.98 0.001 264);
-
-  /* ⚪ Background - Off White / Mist #F9FAFB */
-  --background: oklch(0.98 0.002 240);
-  --foreground: oklch(0.11 0.006 240);        /* Slate Black #111827 */
-
-  /* Card backgrounds using off-white */
-  --card: oklch(0.97 0.003 240);
-  --card-foreground: oklch(0.11 0.006 240);
-
-  --popover: oklch(0.97 0.003 240);
-  --popover-foreground: oklch(0.11 0.006 240);
-
-  /* Secondary using muted tones */
-  --secondary: oklch(0.94 0.005 240);
-  --secondary-foreground: oklch(0.25 0.01 240);
-
-  /* Muted using off-white variations */
-  --muted: oklch(0.96 0.003 240);
-  --muted-foreground: oklch(0.55 0.01 240);
-
-  /* 🟣 Accent - Soft Indigo #6366F1 */
-  --accent: oklch(0.60 0.18 275);
-  --accent-foreground: oklch(0.98 0.001 275);
-
-  /* 🟥 Error - Soft Red #EF4444 */
-  --destructive: oklch(0.62 0.23 25);
-
-  /* Borders and inputs using off-white */
-  --border: oklch(0.92 0.003 240);
-  --input: oklch(0.96 0.003 240);
-  --ring: oklch(0.55 0.22 264);
-
-  /* Chart colors using the new palette */
-  --chart-1: oklch(0.55 0.22 264);   /* Royal Blue */
-  --chart-2: oklch(0.60 0.18 275);   /* Soft Indigo */
-  --chart-3: oklch(0.65 0.19 150);   /* Emerald Green */
-  --chart-4: oklch(0.75 0.15 85);    /* Sun Yellow */
-  --chart-5: oklch(0.70 0.20 45);    /* Vibrant Orange */
-
-  /* 🟢 Success - Emerald Green #10B981 */
-  --success: oklch(0.65 0.19 150);
-  --success-foreground: oklch(0.98 0.001 150);
-
-  /* 🟨 Highlight - Sun Yellow #FACC15 */
-  --warning: oklch(0.75 0.15 85);
-  --warning-foreground: oklch(0.15 0.01 85);
-
-  /* 🧡 CTA Variant - Vibrant Orange #F97316 */
-  --cta: oklch(0.70 0.20 45);
-  --cta-foreground: oklch(0.98 0.001 45);
-}
-
-
-.dark {
-  /* Dark background with subtle blue tint */
-  --background: oklch(0.10 0.01 240);
-  --foreground: oklch(0.92 0.002 240);
-
-  /* Dark card backgrounds */
-  --card: oklch(0.14 0.01 240);
-  --card-foreground: oklch(0.92 0.002 240);
-
-  --popover: oklch(0.14 0.01 240);
-  --popover-foreground: oklch(0.92 0.002 240);
-
-  /* 🔵 Primary - Brighter Royal Blue for dark mode */
-  --primary: oklch(0.65 0.22 264);
-  --primary-foreground: oklch(0.10 0.01 264);
-
-  /* Secondary dark grays */
-  --secondary: oklch(0.20 0.02 240);
-  --secondary-foreground: oklch(0.85 0.002 240);
-
-  /* Muted dark grays */
-  --muted: oklch(0.18 0.01 240);
-  --muted-foreground: oklch(0.65 0.01 240);
-
-  /* 🟣 Accent - Brighter Soft Indigo for dark mode */
-  --accent: oklch(0.70 0.18 275);
-  --accent-foreground: oklch(0.10 0.01 275);
-
-  /* 🟥 Error - Brighter Soft Red for dark mode */
-  --destructive: oklch(0.70 0.23 25);
-
-  /* Dark borders and inputs */
-  --border: oklch(0.22 0.01 240);
-  --input: oklch(0.18 0.01 240);
-  --ring: oklch(0.65 0.22 264);
-
-  /* Chart colors for dark mode */
-  --chart-1: oklch(0.65 0.22 264);   /* Brighter Royal Blue */
-  --chart-2: oklch(0.70 0.18 275);   /* Brighter Soft Indigo */
-  --chart-3: oklch(0.70 0.19 150);   /* Brighter Emerald Green */
-  --chart-4: oklch(0.80 0.15 85);    /* Brighter Sun Yellow */
-  --chart-5: oklch(0.75 0.20 45);    /* Brighter Vibrant Orange */
-
-  /* 🟢 Success - Brighter Emerald Green for dark mode */
-  --success: oklch(0.70 0.19 150);
-  --success-foreground: oklch(0.10 0.01 150);
-
-  /* 🟨 Highlight - Brighter Sun Yellow for dark mode */
-  --warning: oklch(0.80 0.15 85);
-  --warning-foreground: oklch(0.15 0.01 85);
-
-  /* 🧡 CTA Variant - Brighter Vibrant Orange for dark mode */
-  --cta: oklch(0.75 0.20 45);
-  --cta-foreground: oklch(0.10 0.01 45);
-=======
   /* Surfaces — parchment canvas, white elevated cards */
   --background: #fdfcfc;           /* Parchment White — page canvas */
   --foreground: #0f161e;           /* Ink Black — primary text  */
@@ -313,7 +192,6 @@
   /* CTA — keep a bright filled action on dark */
   --cta: #f3efe7;
   --cta-foreground: #0c1714;
->>>>>>> Stashed changes
 }
 
 
@@ -325,8 +203,6 @@
     @apply bg-background text-foreground font-medium;
   }
 
-<<<<<<< Updated upstream
-=======
   /* Night mode — subtle green ambient glow behind the page.
      Two soft radial washes (top + corner) using the brand mint/teal greens,
      fixed so they read as atmosphere rather than scrolling content. */
@@ -343,7 +219,6 @@
     background: color-mix(in srgb, var(--accent) 22%, transparent);
   }
 
->>>>>>> Stashed changes
   /* Modern scrollbar */
   ::-webkit-scrollbar {
     width: 6px;

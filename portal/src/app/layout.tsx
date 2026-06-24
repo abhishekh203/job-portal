@@ -1,9 +1,5 @@
 import type { Metadata } from "next";
-<<<<<<< Updated upstream
-import { Inter, Urbanist, JetBrains_Mono } from "next/font/google";
-=======
 import { Inter, Montserrat, Source_Serif_4, JetBrains_Mono } from "next/font/google";
->>>>>>> Stashed changes
 import "./globals.css";
 import { QueryProvider } from "@/lib/query-client";
 import { ThemeProvider } from "next-themes";
@@ -20,9 +16,6 @@ const inter = Inter({
   variable: "--font-inter",
 });
 
-<<<<<<< Updated upstream
-const urbanist = Urbanist({
-=======
 // Montserrat is reserved for headings/display only — geometric impact at large
 // sizes, where its even strokes read as confident rather than monotonous.
 const montserrat = Montserrat({
@@ -33,9 +26,8 @@ const montserrat = Montserrat({
 
 // Source Serif is reserved for rare editorial pull-quote moments only.
 const sourceSerif = Source_Serif_4({
->>>>>>> Stashed changes
   subsets: ["latin"],
-  variable: "--font-urbanist",
+  variable: "--font-source-serif",
 });
 
 const jetbrainsMono = JetBrains_Mono({
@@ -68,11 +60,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-<<<<<<< Updated upstream
-      <body className={`${inter.variable} ${urbanist.variable} ${jetbrainsMono.variable}`}>
-=======
       <body className={`${inter.variable} ${montserrat.variable} ${sourceSerif.variable} ${jetbrainsMono.variable}`}>
->>>>>>> Stashed changes
         <ThemeProvider
           attribute="class"
           defaultTheme="light"
