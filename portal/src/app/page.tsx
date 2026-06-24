@@ -200,12 +200,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ===== POPULAR SEARCHES ===== */}
-      <PopularSearches />
-
-      {/* ===== MOBILE JOB SEARCH ===== */}
-      <MobileJobSearch />
-
       {/* ===== TRUSTED BY ===== */}
       <section className="py-16 lg:py-20 border-y border-border/40 bg-muted/20">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -393,6 +387,9 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ===== POPULAR SEARCHES ===== */}
+      <PopularSearches />
+
       {/* ===== TESTIMONIALS ===== */}
       <section className="py-20 lg:py-28">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -457,6 +454,9 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* ===== MOBILE JOB SEARCH ===== */}
+      <MobileJobSearch />
     </div>
   )
 }
