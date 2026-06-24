@@ -77,6 +77,13 @@ Each entry: what was asked → what was done → files touched → commit (if pu
   documented the missing **AuditLog** model, fixed `npm start` command, and linked the new
   CLAUDE.md/ARCHITECTURE.md guides. Files: `AGENTS.md`.
 
+### 11. Reworked popular-search tiles to use real fields
+- "Jobs for Women" was faked via `?search=women` (keyword search, no backing field) → replaced with
+  **Internships** (`?jobType=INTERNSHIP`). Also added **Contract Jobs** (`?jobType=CONTRACT`) and
+  **Hybrid Jobs** (`?workLocationType=HYBRID`). Now 7 tiles, all backed by real filters; images are
+  placeholders (TODO: dedicated art). Deferred "women-encouraged" to a future `tags[]` field.
+  File: `portal/src/components/home/popular-searches.tsx`.
+
 ### 10. Added `BEFORE_PRODUCTION_PLAN.md`
 - Pre-launch checklist. Verified online: `nayajagir.com` is **available** (whois no-match) and was
   live ~**2019** (Wayback) → real brand-`.com` edge *if* old backlinks are clean (audit before buy).

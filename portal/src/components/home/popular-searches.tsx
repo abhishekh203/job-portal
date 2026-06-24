@@ -36,8 +36,9 @@ const popularSearches: PopularSearch[] = [
   },
   {
     rank: 4,
-    title: 'Jobs for Women',
-    href: '/jobs?search=women',
+    title: 'Internships',
+    href: '/jobs?jobType=INTERNSHIP',
+    // TODO: replace with a dedicated internships image (reusing old asset as placeholder)
     image: '/images/popular-searches/jobs-for-women.png',
     accent: 'group-hover:border-sky-tile',
   },
@@ -47,6 +48,22 @@ const popularSearches: PopularSearch[] = [
     href: '/jobs?jobType=FULL_TIME',
     image: '/images/popular-searches/full-time-jobs.png',
     accent: 'group-hover:border-apricot-wash',
+  },
+  {
+    rank: 6,
+    title: 'Contract Jobs',
+    href: '/jobs?jobType=CONTRACT',
+    // TODO: replace with a dedicated contract-jobs image (placeholder for now)
+    image: '/images/popular-searches/full-time-jobs.png',
+    accent: 'group-hover:border-mint-glow',
+  },
+  {
+    rank: 7,
+    title: 'Hybrid Jobs',
+    href: '/jobs?workLocationType=HYBRID',
+    // TODO: replace with a dedicated hybrid-jobs image (placeholder for now)
+    image: '/images/popular-searches/remote-jobs.png',
+    accent: 'group-hover:border-sky-tile',
   },
 ]
 
