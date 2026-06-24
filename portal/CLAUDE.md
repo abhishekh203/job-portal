@@ -8,6 +8,68 @@
 The goal: one consistent way to fetch data, one way to handle forms, one typed API layer, and a
 predictable folder layout — so any developer (or AI agent) can navigate the app without guessing.
 
+> 🗺️ **New here?** Read [`ARCHITECTURE.md`](ARCHITECTURE.md) for the map of what exists (routes,
+> providers, API client, design tokens, components), then come back here for the rules on how to
+> change it — starting with **§0 Change Discipline**.
+
+---
+
+> 📒 **Always update the log.** After every feature or change (whether done by a developer or by AI),
+> append a short entry to the root **[`DEVLOG.md`](../DEVLOG.md)** — newest day on top, one or two
+> lines (what changed → file(s)). Keep it brief; it's the project diary.
+
+## 0. Change Discipline — don't break what works (READ FIRST)
+
+The #1 rule: **make the smallest change that satisfies the request.** This is a working product.
+Most tasks are "move/add/restyle one section," not "rewrite the page." Touch only what the task
+needs. Only refactor, restructure, or rename when a feature **genuinely demands it, or when the
+developer explicitly asks for it** — never just because the old code could be "nicer."
+
+**Before you change anything:**
+1. **Find the existing thing first.** Reuse a component/util/hook before creating a new one. The
+   shared building blocks already exist (see §0.1) — search for them.
+2. **Match the surrounding style.** Copy the patterns, class names, spacing, and naming of the file
+   you're in. Consistency > personal preference.
+3. **Change one layer at a time.** A UI tweak should not also "tidy up" data fetching, types, or
+   unrelated files. Keep diffs focused and reviewable.
+4. **Don't touch `components/ui/*` by hand** — those are shadcn primitives; add new ones via the
+   shadcn CLI, never hand-edit.
+5. **Preserve the public shape.** Don't rename props, exported functions, query keys, or API methods
+   that other files import unless the task requires it (it ripples and breaks things).
+6. **Verify after every change.** The page must still compile and return 200 (`curl localhost:3003`).
+   For a logged-in/data view, sanity-check it actually renders.
+
+**Reach for a bigger change only when:** the feature can't be built cleanly on the current
+structure, the existing code is actually broken, or you're explicitly asked to refactor. When you do,
+say so first and explain why.
+
+### 0.1 Reuse these — don't reinvent them
+| Need | Use this | Where |
+|---|---|---|
+| Merge class names | `cn()` | `@/lib/utils` |
+| Format a date | `formatDate()` | `@/lib/utils` |
+| Format salary / job labels | `formatSalary`, `getJobTypeLabel`, `getWorkTypeLabel`, `getExperienceLabel` | `@/lib/api` |
+| HTTP calls + types | `api` (`ApiClient`) + feature `api.ts` | `@/lib/api`, `features/*` |
+| Surface errors | `handleApiError()` | `@/lib/error-handler` |
+| Loading states | shared skeletons | `@/components/loading` |
+| Auth / gating | `useAuth`, `useRequireAuth`, `useRedirectIfAuthenticated` | `@/hooks/use-auth` |
+| Sanitize HTML before render | `sanitizeHtml()` | `@/lib/sanitize` |
+| A job card | `JobCard` | `@/components/jobs/job-card` |
+| Page shell (header/footer) | `SiteLayout` (already wraps all pages) | `@/components/layout` |
+
+### 0.2 Styling — stay on the design system
+- Use **theme tokens**, never hard-coded colors: `bg-primary`, `text-muted-foreground`, `border-border`,
+  `bg-card`, `text-foreground`, `bg-secondary`, etc. (defined in `globals.css`). A raw hex like
+  `#2563EB` is a red flag — it won't adapt to dark mode or theme changes.
+- Fonts come from tokens too: `font-sans` (body), `font-heading` (Montserrat), `font-serif`
+  (pull-quotes only), `font-mono` (code only). Don't import new fonts.
+- Compose classes with `cn()`; **no inline `style={{}}`** for anything Tailwind can express.
+- Match existing radii/spacing (`rounded-xl`/`rounded-2xl`, `p-5`/`p-6`) so cards/sections look like
+  siblings, not strangers.
+
+> If you find yourself editing many files or rewriting a working component to do a small task,
+> stop — you've probably drifted past the scope. Re-scope to the minimal change.
+
 ---
 
 ## 1. Tech Stack (actual, not aspirational)

@@ -43,6 +43,10 @@ import {
   Share2,
   CheckCircle,
   Briefcase,
+  ListChecks,
+  HelpCircle,
+  ChevronDown,
+  Globe,
 } from "lucide-react"
 import {
   Job,
@@ -66,7 +70,41 @@ export function JobDetailsClient({ job, hasApplied }: JobDetailsClientProps) {
   const [coverLetter, setCoverLetter] = useState("")
   const [isApplyDialogOpen, setIsApplyDialogOpen] = useState(false)
   const [isProfileIncompleteAlertOpen, setIsProfileIncompleteAlertOpen] = useState(false)
+  const [openFaq, setOpenFaq] = useState<number | null>(0)
   const queryClient = useQueryClient()
+
+  // FAQs auto-generated from the job's structured data — no extra content needed.
+  const faqs = [
+    {
+      q: "What type of employment is this?",
+      a: `This is a ${getJobTypeLabel(job.jobType).toLowerCase()} position in the ${job.category} category.`,
+    },
+    job.workLocationType && {
+      q: "Is this a remote role?",
+      a:
+        job.workLocationType === "REMOTE"
+          ? "Yes — this role is fully remote."
+          : job.workLocationType === "HYBRID"
+            ? `This is a hybrid role based in ${job.location}, combining on-site and remote work.`
+            : `No — this is an on-site role based in ${job.location}.`,
+    },
+    {
+      q: "What experience level is required?",
+      a: `This role is suited for candidates at the "${getExperienceLabel(job.experienceLevel)}" level.`,
+    },
+    (job.salaryMin || job.salaryMax || job.salaryNegotiable) && {
+      q: "What is the salary for this job?",
+      a: `The offered compensation is ${formatSalary(job.salaryMin, job.salaryMax, job.salaryNegotiable)}${job.currency ? ` (${job.currency})` : ""}.`,
+    },
+    job.applicationDeadline && {
+      q: "When is the application deadline?",
+      a: `Applications close on ${formatDate(job.applicationDeadline)}. We recommend applying early.`,
+    },
+    {
+      q: "How do I apply for this position?",
+      a: `Click "Apply Now", complete your profile, and submit your application directly to ${job.companyName}.`,
+    },
+  ].filter(Boolean) as { q: string; a: string }[]
 
   const applyMutation = useMutation({
     mutationFn: (cover: string) => api.applyToJob(job.id, cover),
@@ -216,6 +254,104 @@ export function JobDetailsClient({ job, hasApplied }: JobDetailsClientProps) {
                       </li>
                     ))}
                   </ul>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Requirements */}
+            {job.requirements && job.requirements.length > 0 && (
+              <Card className="border border-border/60">
+                <CardHeader>
+                  <CardTitle className="text-lg font-semibold flex items-center gap-2">
+                    <ListChecks className="h-5 w-5 text-primary" />
+                    Job Requirements
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-3">
+                    {job.requirements.map((req, idx) => (
+                      <li key={idx} className="flex items-start gap-3 text-sm text-muted-foreground">
+                        <CheckCircle className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                        {req}
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* About the Company */}
+            <Card className="border border-border/60">
+              <CardHeader>
+                <CardTitle className="text-lg font-semibold flex items-center gap-2">
+                  <Building2 className="h-5 w-5 text-primary" />
+                  About {job.companyName}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-start gap-4">
+                  {job.companyLogo ? (
+                    <img src={job.companyLogo} alt="" className="w-14 h-14 rounded-xl object-cover border border-border/50 shrink-0" />
+                  ) : (
+                    <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                      <Building2 className="h-7 w-7 text-primary" />
+                    </div>
+                  )}
+                  <div className="min-w-0 space-y-1.5">
+                    <p className="font-semibold text-foreground">{job.companyName}</p>
+                    <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                      <MapPin className="h-3.5 w-3.5" /> {job.location}
+                    </p>
+                    <div className="flex flex-wrap items-center gap-3 pt-1">
+                      {job.companySlug && (
+                        <Link href={`/companies/${job.companySlug}`} className="text-sm font-medium text-primary hover:underline">
+                          View all jobs at {job.companyName}
+                        </Link>
+                      )}
+                      {job.companyWebsite && (
+                        <Link
+                          href={job.companyWebsite}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
+                        >
+                          <Globe className="h-3.5 w-3.5" /> Website
+                        </Link>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* FAQs about this job */}
+            {faqs.length > 0 && (
+              <Card className="border border-border/60">
+                <CardHeader>
+                  <CardTitle className="text-lg font-semibold flex items-center gap-2">
+                    <HelpCircle className="h-5 w-5 text-primary" />
+                    FAQs about this job
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="divide-y divide-border/50">
+                  {faqs.map((faq, idx) => (
+                    <div key={idx} className="py-1">
+                      <button
+                        type="button"
+                        onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
+                        className="flex w-full items-center justify-between gap-4 py-3 text-left"
+                        aria-expanded={openFaq === idx}
+                      >
+                        <span className="text-sm font-medium text-foreground">{faq.q}</span>
+                        <ChevronDown
+                          className={`h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200 ${openFaq === idx ? "rotate-180" : ""}`}
+                        />
+                      </button>
+                      {openFaq === idx && (
+                        <p className="pb-3 pr-8 text-sm leading-relaxed text-muted-foreground">{faq.a}</p>
+                      )}
+                    </div>
+                  ))}
                 </CardContent>
               </Card>
             )}

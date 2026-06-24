@@ -86,7 +86,7 @@ export default function HomePage() {
 
   const steps = [
     { icon: FileSearch, title: 'Search Jobs', description: 'Browse thousands of opportunities from leading companies across industries.' },
-    { icon: UserCheck, title: 'Apply Instantly', description: 'Submit your application with a single click. No繁琐 forms, just your profile.' },
+    { icon: UserCheck, title: 'Apply Instantly', description: 'Submit your application with a single click. No lengthy forms, just your profile.' },
     { icon: Star, title: 'Get Hired', description: 'Connect with employers and land your dream role faster than ever.' },
   ]
 
