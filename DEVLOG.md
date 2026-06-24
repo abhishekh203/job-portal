@@ -72,6 +72,18 @@ Each entry: what was asked → what was done → files touched → commit (if pu
 - **New-feature workflow:** added "research → propose → agree → build → verify → explain-if-asked"
   (incl. web/GitHub search for heavy features) to root `CLAUDE.md` + `server/CLAUDE.md` (backend-focused).
 
+### 9. Refreshed `AGENTS.md` (was outdated)
+- Fixed stale ports (server 5000→**5050**, portal 3000→**3003**), corrected model count (6→**10**) and
+  documented the missing **AuditLog** model, fixed `npm start` command, and linked the new
+  CLAUDE.md/ARCHITECTURE.md guides. Files: `AGENTS.md`.
+
+### 10. Added `BEFORE_PRODUCTION_PLAN.md`
+- Pre-launch checklist. Verified online: `nayajagir.com` is **available** (whois no-match) and was
+  live ~**2019** (Wayback) → real brand-`.com` edge *if* old backlinks are clean (audit before buy).
+- Captured decisions: buy `nayajagir.com` (pending), backend on local VPS (pending), Supabase now /
+  cloud storage like GCS later, secrets via env only. Pulled in SEO fixes + backend hardening. File:
+  `BEFORE_PRODUCTION_PLAN.md`.
+
 ---
 
 ## How to maintain this log

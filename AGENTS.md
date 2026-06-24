@@ -3,7 +3,11 @@
 ## Project Overview
 Monorepo with 3 services: a Next.js public frontend (`portal/`), a React admin dashboard (`admin/`), and an Express backend API (`server/`).
 
-> **Frontend patterns:** `portal/` has its own engineering guide at [`portal/CLAUDE.md`](portal/CLAUDE.md) — the source of truth for data fetching (TanStack Query), forms (react-hook-form + Zod), the typed API layer, and folder structure. Read it before changing `portal/` code.
+> **Developer guides:** each app has a CLAUDE.md (rules) + ARCHITECTURE.md (map). Read before changing code:
+> - Root: [`CLAUDE.md`](CLAUDE.md) — project overview, workflow, git rules, owner preferences.
+> - Frontend: [`portal/CLAUDE.md`](portal/CLAUDE.md) + [`portal/ARCHITECTURE.md`](portal/ARCHITECTURE.md) — TanStack Query, RHF+Zod, typed API layer, §0 Change Discipline.
+> - Backend: [`server/CLAUDE.md`](server/CLAUDE.md) + [`server/ARCHITECTURE.md`](server/ARCHITECTURE.md) — Route→Controller→Service standard, §0 Change Discipline, tech-debt list.
+> - History: [`DEVLOG.md`](DEVLOG.md) — day-wise change log (update after every change).
 
 ## Tech Stack
 
@@ -39,7 +43,7 @@ Monorepo with 3 services: a Next.js public frontend (`portal/`), a React admin d
 
 ```
 job-portal/
-├── server/                          # Backend API (port 5000)
+├── server/                          # Backend API (port 5050)
 │   ├── src/
 │   │   ├── index.ts                 # Entry point — middleware, routes, error handling
 │   │   ├── routes/                  # auth, jobs, user, admin, blogs, upload, employer, companies
@@ -49,8 +53,8 @@ job-portal/
 │   │   └── lib/                     # Prisma client (db.ts), JWT utils, email (Nodemailer), Supabase, utilities
 │   ├── prisma/
 │   │   └── schema.prisma           # DB schema (User, Job, Application, Blog)
-│   └── start.js                     # Production entry (loads dotenv + compiled dist/)
-├── portal/                          # Public frontend (port 3000)
+│   └── start.js                     # Helper script (npm start runs `node -r dotenv/config dist/index.js`)
+├── portal/                          # Public frontend (port 3003)
 │   └── src/
 │       ├── app/                     # Next.js App Router pages
 │       │   ├── page.tsx             # Home page
@@ -78,7 +82,7 @@ job-portal/
         └── services/                # Alternative fetch-based API wrappers
 ```
 
-## Database (PostgreSQL) — 6 Models
+## Database (PostgreSQL) — 10 Models
 
 ### User (`users`)
 - Auth: email (unique), password (bcrypt), emailVerified, emailVerificationToken/Expires, passwordResetToken/Expires
@@ -118,6 +122,10 @@ job-portal/
 - title, slug (unique), content (rich text), excerpt, featuredImage
 - SEO: metaTitle, metaDescription, metaKeywords[], structuredData (JSON-LD / Json)
 - isPublished, publishedAt
+
+### AuditLog (`audit_logs`)
+- actorId, action, entity, entityId, metadata (JSON), ipAddress, userAgent, createdAt
+- General-purpose log of sensitive admin/employer actions; indexed on `[createdAt]`
 
 ### SubscriptionPlan (`subscription_plans`)
 - name, slug (unique), price (Float), duration (MONTHLY|YEARLY)
@@ -169,9 +177,9 @@ job-portal/
 ### server/
 | Command | Description |
 |---------|-------------|
-| `npm run dev` | Start dev server with nodemon (port 5000) |
+| `npm run dev` | Start dev server with nodemon (port 5050) |
 | `npm run build` | Compile TypeScript to `dist/` |
-| `npm start` | Production start (`node start.js`) |
+| `npm start` | Production start (`node -r dotenv/config dist/index.js`) |
 | `npm run db:generate` | Generate Prisma client |
 | `npm run db:push` | Push schema to database |
 | `npm run db:migrate` | Run Prisma migrations |
@@ -181,7 +189,7 @@ job-portal/
 ### portal/
 | Command | Description |
 |---------|-------------|
-| `npm run dev` | Next.js dev server with Turbopack (port 3000) |
+| `npm run dev` | Next.js dev server with Turbopack (port 3003) |
 | `npm run build` | Production build |
 | `npm run start` | Production start |
 | `npm run lint` | Run ESLint |
@@ -204,8 +212,8 @@ job-portal/
 | `SUPABASE_URL` | Supabase project URL |
 | `SUPABASE_ANON_KEY` | Supabase anon/public key |
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key (for admin operations) |
-| `PORT` | Server port (default 5000) |
-| `FRONTEND_URL` | Client URL for CORS (http://localhost:3000) |
+| `PORT` | Server port (code fallback 5000; set to **5050** in this project's `.env`) |
+| `FRONTEND_URL` | Client URL for CORS (set to `http://localhost:3003`; code fallback is `:3000`) |
 | `ADMIN_URL` | Admin URL for CORS |
 | `ADMIN_SECRET_KEY` | Secret key required to register new admin accounts |
 | `SMTP_HOST` / `SMTP_PORT` / `SMTP_SECURE` / `SMTP_USER` / `SMTP_PASS` | Gmail SMTP credentials |
