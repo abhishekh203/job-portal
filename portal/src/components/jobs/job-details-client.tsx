@@ -71,9 +71,13 @@ export function JobDetailsClient({ job, hasApplied }: JobDetailsClientProps) {
   const [openFaq, setOpenFaq] = useState<number | null>(0)
   const queryClient = useQueryClient()
 
-  // Always start the job detail page at the top, regardless of prior scroll position.
+  // Always start the job detail page at the top, regardless of prior scroll
+  // position. The extra rAF reset overrides the browser/Next scroll restoration
+  // that can otherwise run after mount (e.g. opening a job from far down a list).
   useEffect(() => {
     window.scrollTo(0, 0)
+    const raf = requestAnimationFrame(() => window.scrollTo(0, 0))
+    return () => cancelAnimationFrame(raf)
   }, [job.id])
 
   // FAQs auto-generated from the job's structured data — no extra content needed.
