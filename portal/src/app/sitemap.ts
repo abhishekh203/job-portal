@@ -1,6 +1,6 @@
 import { api } from '@/lib/api'
 
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://www.darbarjob.com'
 
 export default async function sitemap() {
   const [jobsRes, blogsRes] = await Promise.allSettled([
