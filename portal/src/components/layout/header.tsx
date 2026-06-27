@@ -73,7 +73,7 @@ export function Header() {
                 <Briefcase className="h-5 w-5 text-primary-foreground dark:text-white" />
               </div>
               <span className="text-2xl font-bold text-foreground tracking-tight">
-                Naya<span className="text-primary">Jagir</span>
+                Darbar<span className="text-primary">Job</span>
               </span>
             </Link>
 
