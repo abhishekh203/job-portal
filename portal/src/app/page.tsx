@@ -373,7 +373,7 @@ export default function HomePage() {
                       <div className="flex items-center justify-between">
                         <div className="text-sm font-semibold text-primary">
                           {job.salaryMin
-                            ? `$${job.salaryMin.toLocaleString()}${job.salaryMax ? ` - $${job.salaryMax.toLocaleString()}` : ''}`
+                            ? `Rs ${job.salaryMin.toLocaleString()}${job.salaryMax ? ` - Rs ${job.salaryMax.toLocaleString()}` : ''}`
                             : 'Salary not specified'}
                         </div>
                         <div className="text-sm text-muted-foreground">{job.category}</div>

@@ -78,7 +78,7 @@ export default async function JobPage({ params }: JobPageProps) {
       },
       baseSalary: job.salaryMin && job.salaryMax ? {
         '@type': 'MonetaryAmount',
-        currency: 'USD',
+        currency: 'NPR',
         value: {
           '@type': 'QuantitativeValue',
           minValue: job.salaryMin,

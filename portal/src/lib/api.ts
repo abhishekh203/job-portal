@@ -718,9 +718,9 @@ export const api = new ApiClient(API_BASE_URL)
 export const formatSalary = (min?: number, max?: number, negotiable?: boolean): string => {
   if (negotiable) return 'Negotiable'
   if (!min && !max) return 'Not specified'
-  if (min && max) return `$${min.toLocaleString()} - $${max.toLocaleString()}`
-  if (min) return `$${min.toLocaleString()}+`
-  if (max) return `Up to $${max.toLocaleString()}`
+  if (min && max) return `Rs ${min.toLocaleString()} - Rs ${max.toLocaleString()}`
+  if (min) return `Rs ${min.toLocaleString()}+`
+  if (max) return `Up to Rs ${max.toLocaleString()}`
   return 'Not specified'
 }
 
