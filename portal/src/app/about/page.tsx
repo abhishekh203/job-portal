@@ -110,7 +110,7 @@ export default function AboutPage() {
             <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
               About{' '}
               <span className="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-                NayaJagir
+                DarbarJob
               </span>
             </h1>
             <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
@@ -160,7 +160,7 @@ export default function AboutPage() {
               <div>
                 <h2 className="text-3xl font-bold text-foreground mb-6">Our Mission</h2>
                 <p className="text-lg text-muted-foreground mb-6 leading-relaxed">
-                  At NayaJagir, we believe that finding the right job shouldn&apos;t be a struggle.
+                  At DarbarJob, we believe that finding the right job shouldn&apos;t be a struggle.
                   Our mission is to bridge the gap between talented professionals and forward-thinking
                   companies, creating opportunities that drive both individual growth and business success.
                 </p>
@@ -273,7 +273,7 @@ export default function AboutPage() {
             <div className="text-center mb-16">
               <h2 className="text-3xl font-bold text-foreground mb-4">Meet Our Team</h2>
               <p className="text-xl text-muted-foreground">
-                The passionate people behind NayaJagir&apos;s success.
+                The passionate people behind DarbarJob&apos;s success.
               </p>
             </div>
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
@@ -308,7 +308,7 @@ export default function AboutPage() {
               Ready to Start Your Journey?
             </h2>
             <p className="text-xl text-muted-foreground mb-8">
-              Join thousands of professionals who have found their dream jobs through NayaJagir.
+              Join thousands of professionals who have found their dream jobs through DarbarJob.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button size="lg" asChild>

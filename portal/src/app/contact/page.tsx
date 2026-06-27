@@ -59,9 +59,9 @@ export default function ContactPage() {
     {
       icon: Mail,
       title: 'Email Us',
-      details: 'hello@nayajagir.com',
+      details: 'hello@darbarjob.com',
       description: 'Send us an email anytime',
-      action: 'mailto:hello@nayajagir.com',
+      action: 'mailto:hello@darbarjob.com',
     },
     {
       icon: Phone,
@@ -85,7 +85,7 @@ export default function ContactPage() {
       answer: 'Currently, job posting is handled through our admin panel. Please contact us to discuss your hiring needs.',
     },
     {
-      question: 'Is NayaJagir free for job seekers?',
+      question: 'Is DarbarJob free for job seekers?',
       answer: 'Yes! Creating an account, browsing jobs, and applying for positions is completely free for job seekers.',
     },
     {

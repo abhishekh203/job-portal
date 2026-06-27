@@ -77,7 +77,7 @@ export function PopularSearches() {
               Trending now
             </p>
             <h2 className="max-w-sm text-4xl font-bold leading-[1.05] tracking-tight text-foreground lg:text-6xl">
-              Popular searches on NayaJagir
+              Popular searches on DarbarJob
             </h2>
             <p className="mt-5 max-w-sm text-base leading-relaxed text-muted-foreground">
               Start with the roles job seekers across Nepal are exploring most.

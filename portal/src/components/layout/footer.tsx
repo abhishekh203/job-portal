@@ -60,7 +60,7 @@ export function Footer() {
                 required
                 className="flex-1 h-12 rounded-xl border-background/20 bg-background/10 text-background placeholder:text-background/40 focus:border-primary/50"
               />
-              <Button type="submit" className="h-12 rounded-xl px-6 gradient-primary text-white shrink-0">
+              <Button type="submit" className="h-12 rounded-xl px-6 gradient-primary text-primary-foreground shrink-0">
                 Subscribe <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </form>
@@ -85,7 +85,7 @@ export function Footer() {
             <div className="space-y-3">
               <div className="flex items-center gap-3 text-background/50 text-sm">
                 <Mail className="h-4 w-4 text-accent shrink-0" />
-                <span>hello@nayajagir.com</span>
+                <span>hello@darbarjob.com</span>
               </div>
               <div className="flex items-center gap-3 text-background/50 text-sm">
                 <Phone className="h-4 w-4 text-accent shrink-0" />
@@ -122,7 +122,7 @@ export function Footer() {
         {/* Bottom Footer */}
         <div className="py-8 border-t border-background/10 flex flex-col md:flex-row justify-between items-center gap-6">
           <p className="text-background/40 text-sm text-center md:text-left">
-            &copy; {currentYear} NayaJagir. All rights reserved.
+            &copy; {currentYear} DarbarJob. All rights reserved.
           </p>
           <div className="flex items-center gap-6">
             <Link href="/privacy" className="text-background/40 hover:text-accent transition-colors text-sm">

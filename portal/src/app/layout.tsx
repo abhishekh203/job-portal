@@ -36,19 +36,23 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "NayaJagir - Find Your Dream Job",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://www.darbarjob.com"),
+  verification: {
+    google: "g7x-lC3YBUVTVITJ_sskrtg1F_LuPUmUoy6TT9W_Y5s",
+  },
+  title: "DarbarJob - Find Your Dream Job",
   description: "Connecting talented professionals with amazing opportunities. Find your dream job or discover your next great hire.",
   keywords: ["jobs", "careers", "employment", "hiring", "recruitment"],
-  authors: [{ name: "NayaJagir Team" }],
+  authors: [{ name: "DarbarJob Team" }],
   openGraph: {
-    title: "NayaJagir - Find Your Dream Job",
+    title: "DarbarJob - Find Your Dream Job",
     description: "Connecting talented professionals with amazing opportunities.",
     type: "website",
     locale: "en_US",
   },
   twitter: {
     card: "summary_large_image",
-    title: "NayaJagir - Find Your Dream Job",
+    title: "DarbarJob - Find Your Dream Job",
     description: "Connecting talented professionals with amazing opportunities.",
   },
 };

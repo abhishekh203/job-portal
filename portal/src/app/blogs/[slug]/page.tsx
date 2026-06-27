@@ -13,7 +13,7 @@ export async function generateMetadata({ params }: BlogPageProps): Promise<Metad
     const blog = await api.getBlog(slug)
 
     return {
-      title: `${blog.title} | NayaJagir Blog`,
+      title: `${blog.title} | DarbarJob Blog`,
       description: blog.excerpt,
       keywords: ['career', 'job', 'advice', 'professional development', blog.title],
       authors: blog.author ? [{ name: blog.author }] : undefined,
@@ -38,7 +38,7 @@ export async function generateMetadata({ params }: BlogPageProps): Promise<Metad
     }
   } catch {
     return {
-      title: 'Blog Post Not Found | NayaJagir',
+      title: 'Blog Post Not Found | DarbarJob',
       description: 'The blog post you are looking for could not be found.',
     }
   }
@@ -62,7 +62,7 @@ export default async function BlogPage({ params }: BlogPageProps) {
       } : undefined,
       publisher: {
         '@type': 'Organization',
-        name: 'NayaJagir',
+        name: 'DarbarJob',
         logo: {
           '@type': 'ImageObject',
           url: '/logo.png',

@@ -51,17 +51,17 @@ const getEmailTemplate = (type: 'verification' | 'passwordReset' | 'jobApproved'
 
   if (type === 'verification') {
     return {
-      subject: '🚀 Verify Your NayaJagir Account',
+      subject: '🚀 Verify Your DarbarJob Account',
       html: `
         <!DOCTYPE html>
         <html>
         <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Verify Your Email</title><style>${styles}.header { background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); }.header h1 { color: #ffffff; margin: 0; font-size: 28px; font-weight: 800; }.button { background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); }.highlight { color: #6366f1; }</style></head>
         <body>
           <div class="container">
-            <div class="header"><h1>🚀 Welcome to NayaJagir!</h1></div>
+            <div class="header"><h1>🚀 Welcome to DarbarJob!</h1></div>
             <div class="content">
               <h2>Hey there! 👋</h2>
-              <p>Thanks for joining the <span class="highlight">NayaJagir</span> community! We're excited to help you find your dream job.</p>
+              <p>Thanks for joining the <span class="highlight">DarbarJob</span> community! We're excited to help you find your dream job.</p>
               <p>To get started, please verify your email address by clicking the button below:</p>
               <div style="text-align: center;">
                 <a href="${baseUrl}/auth/verify-email?token=${data.token}" class="button">✨ Verify My Email</a>
@@ -70,9 +70,9 @@ const getEmailTemplate = (type: 'verification' | 'passwordReset' | 'jobApproved'
               <p>If the button doesn't work, copy and paste this link into your browser:</p>
               <p style="word-break: break-all; color: #6366f1;">${baseUrl}/auth/verify-email?token=${data.token}</p>
               <hr style="margin: 30px 0; border: none; border-top: 1px solid #e5e7eb;">
-              <p style="color: #6b7280; font-size: 14px;">If you didn't create an account with NayaJagir, you can safely ignore this email.</p>
+              <p style="color: #6b7280; font-size: 14px;">If you didn't create an account with DarbarJob, you can safely ignore this email.</p>
             </div>
-            <div class="footer"><p>© 2024 NayaJagir. Made with 💜 for Gen Z.</p><p>Disrupting the job market, one opportunity at a time.</p></div>
+            <div class="footer"><p>© 2024 DarbarJob. Made with 💜 for Gen Z.</p><p>Disrupting the job market, one opportunity at a time.</p></div>
           </div>
         </body>
         </html>
@@ -82,7 +82,7 @@ const getEmailTemplate = (type: 'verification' | 'passwordReset' | 'jobApproved'
 
   if (type === 'passwordReset') {
     return {
-      subject: '🔐 Reset Your NayaJagir Password',
+      subject: '🔐 Reset Your DarbarJob Password',
       html: `
         <!DOCTYPE html>
         <html>
@@ -92,7 +92,7 @@ const getEmailTemplate = (type: 'verification' | 'passwordReset' | 'jobApproved'
             <div class="header"><h1>🔐 Password Reset</h1></div>
             <div class="content">
               <h2>Reset Your Password</h2>
-              <p>We received a request to reset your password for your <span class="highlight">NayaJagir</span> account.</p>
+              <p>We received a request to reset your password for your <span class="highlight">DarbarJob</span> account.</p>
               <p>Click the button below to create a new password:</p>
               <div style="text-align: center;">
                 <a href="${baseUrl}/auth/reset-password?token=${data.token}" class="button">🔑 Reset My Password</a>
@@ -110,7 +110,7 @@ const getEmailTemplate = (type: 'verification' | 'passwordReset' | 'jobApproved'
               <hr style="margin: 30px 0; border: none; border-top: 1px solid #e5e7eb;">
               <p style="color: #6b7280; font-size: 14px;">If you didn't request a password reset, someone might be trying to access your account.</p>
             </div>
-            <div class="footer"><p>© 2024 NayaJagir. Made with 💜 for Gen Z.</p><p>Keep your account secure!</p></div>
+            <div class="footer"><p>© 2024 DarbarJob. Made with 💜 for Gen Z.</p><p>Keep your account secure!</p></div>
           </div>
         </body>
         </html>
@@ -130,13 +130,13 @@ const getEmailTemplate = (type: 'verification' | 'passwordReset' | 'jobApproved'
             <div class="header"><h1>✅ Job Approved!</h1></div>
             <div class="content">
               <h2>Great news!</h2>
-              <p>Your job posting <strong>"${data.jobTitle}"</strong> has been approved and is now live on NayaJagir.</p>
+              <p>Your job posting <strong>"${data.jobTitle}"</strong> has been approved and is now live on DarbarJob.</p>
               <p>Job seekers can now find and apply for this position.</p>
               <div style="text-align: center;">
                 <a href="${baseUrl}/dashboard/employer/jobs" class="button">View My Jobs</a>
               </div>
             </div>
-            <div class="footer"><p>© 2024 NayaJagir. Made with 💜 for Gen Z.</p></div>
+            <div class="footer"><p>© 2024 DarbarJob. Made with 💜 for Gen Z.</p></div>
           </div>
         </body>
         </html>
@@ -163,7 +163,7 @@ const getEmailTemplate = (type: 'verification' | 'passwordReset' | 'jobApproved'
                 <a href="${baseUrl}/dashboard/employer/jobs" class="button">Manage My Jobs</a>
               </div>
             </div>
-            <div class="footer"><p>© 2024 NayaJagir. Made with 💜 for Gen Z.</p></div>
+            <div class="footer"><p>© 2024 DarbarJob. Made with 💜 for Gen Z.</p></div>
           </div>
         </body>
         </html>
@@ -206,7 +206,7 @@ const getEmailTemplate = (type: 'verification' | 'passwordReset' | 'jobApproved'
             <hr style="margin: 30px 0; border: none; border-top: 1px solid #e5e7eb;">
             <p style="color: #6b7280; font-size: 14px;">Keep an eye on your dashboard for further updates. Best of luck! 🍀</p>
           </div>
-          <div class="footer"><p>© 2024 NayaJagir. Made with 💜 for Gen Z.</p></div>
+          <div class="footer"><p>© 2024 DarbarJob. Made with 💜 for Gen Z.</p></div>
         </div>
       </body>
       </html>
@@ -221,7 +221,7 @@ export const sendVerificationEmail = async (email: string, token: string): Promi
 
     await transporter.sendMail({
       from: {
-        name: process.env.FROM_NAME || 'NayaJagir Team',
+        name: process.env.FROM_NAME || 'DarbarJob Team',
         address: process.env.FROM_EMAIL || process.env.SMTP_USER || ''
       },
       to: email,
@@ -245,7 +245,7 @@ export const sendPasswordResetEmail = async (email: string, token: string): Prom
 
     await transporter.sendMail({
       from: {
-        name: process.env.FROM_NAME || 'NayaJagir Team',
+        name: process.env.FROM_NAME || 'DarbarJob Team',
         address: process.env.FROM_EMAIL || process.env.SMTP_USER || ''
       },
       to: email,
@@ -269,7 +269,7 @@ export const sendJobApprovedEmail = async (email: string, name: string, jobTitle
 
     await transporter.sendMail({
       from: {
-        name: process.env.FROM_NAME || 'NayaJagir Team',
+        name: process.env.FROM_NAME || 'DarbarJob Team',
         address: process.env.FROM_EMAIL || process.env.SMTP_USER || ''
       },
       to: email,
@@ -292,7 +292,7 @@ export const sendJobRejectedEmail = async (email: string, name: string, jobTitle
 
     await transporter.sendMail({
       from: {
-        name: process.env.FROM_NAME || 'NayaJagir Team',
+        name: process.env.FROM_NAME || 'DarbarJob Team',
         address: process.env.FROM_EMAIL || process.env.SMTP_USER || ''
       },
       to: email,
@@ -321,7 +321,7 @@ export const sendApplicationStatusEmail = async (
 
     await transporter.sendMail({
       from: {
-        name: process.env.FROM_NAME || 'NayaJagir Team',
+        name: process.env.FROM_NAME || 'DarbarJob Team',
         address: process.env.FROM_EMAIL || process.env.SMTP_USER || ''
       },
       to: email,

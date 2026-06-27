@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import Link from "next/link"
 import { useAuth } from "@/hooks/use-auth"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
@@ -70,6 +70,11 @@ export function JobDetailsClient({ job, hasApplied }: JobDetailsClientProps) {
   const [isProfileIncompleteAlertOpen, setIsProfileIncompleteAlertOpen] = useState(false)
   const [openFaq, setOpenFaq] = useState<number | null>(0)
   const queryClient = useQueryClient()
+
+  // Always start the job detail page at the top, regardless of prior scroll position.
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [job.id])
 
   // FAQs auto-generated from the job's structured data — no extra content needed.
   const faqs = [

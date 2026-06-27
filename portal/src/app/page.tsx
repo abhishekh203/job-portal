@@ -143,7 +143,7 @@ export default function HomePage() {
                 <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-2">
                   <Button
                     asChild
-                    className="h-12 px-6 rounded-xl gradient-primary text-white shadow-md hover:shadow-lg transition-all duration-200"
+                    className="h-12 px-6 rounded-xl gradient-primary text-primary-foreground shadow-md hover:shadow-lg transition-all duration-200"
                   >
                     <Link href={searchQuery.trim() ? `/jobs?search=${encodeURIComponent(searchQuery.trim())}` : '/jobs'}>
                       Search <ArrowRight className="ml-2 h-4 w-4" />
@@ -398,7 +398,7 @@ export default function HomePage() {
               What Our Users Say
             </h2>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              Real stories from real people who found success on NayaJagir.
+              Real stories from real people who found success on DarbarJob.
             </p>
           </div>
 

@@ -5,6 +5,32 @@ Each entry: what was asked → what was done → files touched → commit (if pu
 
 ---
 
+## 2026-06-27
+
+### 1. Upgraded portal to Next.js 16 (Vercel deploy was blocked)
+- **Asked:** deploy portal to Vercel; deploy failed on "vulnerable Next.js version".
+- **Did:** upgraded `portal` Next.js `15.3.2 → 16.2.9` (+ React 19.2.7, eslint-config-next 16), ran `@next/codemod upgrade`. Build verified locally (25 routes). Files: `portal/package.json`, `portal/package-lock.json`, `portal/tsconfig.json`.
+- **Commit:** `63d2b0b` — *Upgrade portal to Next.js 16 to fix Vercel vulnerability block*
+
+### 2. Rebrand NayaJagir → DarbarJob (new domain darbarjob.com)
+- **Asked:** rebrand to our new domain `https://www.darbarjob.com`.
+- **Did:** replaced `NayaJagir → DarbarJob` and `nayajagir → darbarjob` across `portal/src`, `admin/src`, `server/src` (UI text, page titles, emails `hello@darbarjob.com`, email templates). Renamed asset `nayajagir-mobile-v1.png → darbarjob-mobile-v1.png`. Added `metadataBase` (darbarjob.com) in `portal/src/app/layout.tsx`.
+
+### 3. Job detail page now opens at the top
+- **Asked:** clicking a job should load the page from the top.
+- **Did:** added `window.scrollTo(0,0)` on mount (keyed to `job.id`) in `portal/src/components/jobs/job-details-client.tsx`.
+
+### 4. Google Search Console verification
+- **Asked:** add the GSC site-verification meta tag for darbarjob.com.
+- **Did:** added `verification.google` to root metadata in `portal/src/app/layout.tsx` (renders site-wide).
+
+### 5. Off-theme colors → design tokens (forgot/reset password + others)
+- **Asked:** forgot-password didn't match theme; check signup/login/everywhere for hardcoded colors.
+- **Did:** swept `portal/src`. Replaced misused `destructive`/`cta` red gradient + `text-white` with `gradient-primary` + `text-primary-foreground` in `auth/forgot-password` and `auth/reset-password` (icon, button, bg blob). Converted on-primary `text-white → text-primary-foreground` in `page.tsx`, `header.tsx`, `footer.tsx`, `mobile-job-search.tsx` (adapts in dark mode).
+- **Left intentional:** multi-color placeholder company logos (`page.tsx` marquee), frosted-glass `bg-white/x dark:…` overlays, `text-primary-foreground dark:text-white` logo icons, `bg-black/50` modal scrims. Login/register already clean.
+
+---
+
 ## 2026-06-24
 
 ### 1. Synced with remote & fixed a broken build

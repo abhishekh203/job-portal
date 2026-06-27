@@ -100,14 +100,14 @@ export default function ForgotPasswordPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-secondary/10 flex items-center justify-center p-4">
       {/* Background Elements */}
-      <div className="absolute top-20 left-10 w-72 h-72 bg-destructive/10 rounded-full blur-3xl float"></div>
+      <div className="absolute top-20 left-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl float"></div>
       <div className="absolute bottom-20 right-10 w-96 h-96 bg-accent/10 rounded-full blur-3xl float" style={{animationDelay: '2s'}}></div>
       
       <div className="w-full max-w-md relative">
         <Card className="glass border-0 p-8">
           <CardHeader className="text-center p-0 mb-8">
-            <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br from-destructive to-cta glow-accent">
-              <Mail className="h-10 w-10 text-white" />
+            <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl gradient-primary glow-accent">
+              <Mail className="h-10 w-10 text-primary-foreground" />
             </div>
             <CardTitle className="text-2xl font-black text-foreground">
               Forgot Password? 🔐
@@ -142,7 +142,7 @@ export default function ForgotPasswordPage() {
                 <Button
                   type="submit"
                   disabled={form.formState.isSubmitting}
-                  className="w-full rounded-2xl font-bold h-12 bg-gradient-to-r from-destructive to-cta hover:scale-105 transition-all duration-200"
+                  className="w-full rounded-2xl font-bold h-12 gradient-primary hover:scale-105 transition-all duration-200"
                 >
                   {form.formState.isSubmitting ? (
                     <>

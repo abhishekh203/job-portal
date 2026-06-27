@@ -115,7 +115,7 @@ export default function DashboardPage() {
       {/* Welcome Section */}
       <div className="bg-white p-6 rounded-lg shadow">
         <h1 className="text-2xl font-bold text-gray-900 mb-2">
-          Welcome to NayaJagir Admin
+          Welcome to DarbarJob Admin
         </h1>
         <p className="text-gray-600">
           Manage your job portal efficiently with our comprehensive admin dashboard.

@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 
 const mobileBenefits = [
   'Search and filter jobs from any device',
-  'Apply using your saved NayaJagir profile',
+  'Apply using your saved DarbarJob profile',
   'Track every application in one place',
 ]
 
@@ -24,7 +24,7 @@ export function MobileJobSearch() {
               </div>
 
               <h2 className="max-w-xl text-4xl font-bold leading-[1.05] tracking-tight text-foreground sm:text-5xl lg:text-6xl">
-                NayaJagir, wherever your career takes you
+                DarbarJob, wherever your career takes you
               </h2>
               <p className="mt-5 max-w-lg text-lg leading-relaxed text-muted-foreground">
                 Browse opportunities, apply faster, and keep track of your progress from your phone.
@@ -33,7 +33,7 @@ export function MobileJobSearch() {
               <ul className="mt-8 space-y-3">
                 {mobileBenefits.map((benefit) => (
                   <li key={benefit} className="flex items-center gap-3 text-sm font-medium text-foreground/80">
-                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-white">
+                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
                       <Check className="h-3.5 w-3.5" />
                     </span>
                     {benefit}
@@ -42,7 +42,7 @@ export function MobileJobSearch() {
               </ul>
 
               <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-                <Button asChild size="lg" className="h-12 rounded-xl px-7 text-white gradient-primary">
+                <Button asChild size="lg" className="h-12 rounded-xl px-7 text-primary-foreground gradient-primary">
                   <Link href="/jobs">
                     Browse jobs <ArrowRight className="ml-1 h-4 w-4" />
                   </Link>
@@ -55,8 +55,8 @@ export function MobileJobSearch() {
 
             <div className="relative min-h-[420px] overflow-hidden lg:min-h-full">
               <Image
-                src="/images/nayajagir-mobile-v1.png"
-                alt="NayaJagir job search experience displayed on a mobile phone"
+                src="/images/darbarjob-mobile-v1.png"
+                alt="DarbarJob job search experience displayed on a mobile phone"
                 fill
                 sizes="(max-width: 1024px) 100vw, 40vw"
                 className="object-cover object-center transition-transform duration-700 hover:scale-[1.025] dark:brightness-[0.58] dark:saturate-75"

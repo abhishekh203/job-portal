@@ -169,7 +169,7 @@ export function Header() {
                 <Button variant="ghost" asChild className="rounded-lg font-semibold px-5 hover:bg-muted/60">
                   <Link href="/auth/login">Sign In</Link>
                 </Button>
-                <Button asChild className="rounded-lg px-5 font-semibold gradient-primary text-white shadow-md hover:shadow-lg transition-all duration-200">
+                <Button asChild className="rounded-lg px-5 font-semibold gradient-primary text-primary-foreground shadow-md hover:shadow-lg transition-all duration-200">
                   <Link href="/auth/register">Create Account</Link>
                 </Button>
               </div>
@@ -228,7 +228,7 @@ export function Header() {
                     Sign In
                   </Link>
                 </Button>
-                <Button asChild className="w-full justify-center rounded-xl font-semibold h-12 gradient-primary text-white">
+                <Button asChild className="w-full justify-center rounded-xl font-semibold h-12 gradient-primary text-primary-foreground">
                   <Link href="/auth/register" onClick={() => setMobileMenuOpen(false)}>
                     Create Account
                   </Link>
